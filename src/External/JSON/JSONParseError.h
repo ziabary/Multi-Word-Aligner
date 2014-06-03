@@ -20,26 +20,6 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef INTFEXTERNALSTEMMER_H
-#define INTFEXTERNALSTEMMER_H
-
-#include "intfBaseExternal.hpp"
-
-class intfExternalStemmer : virtual public intfBaseExternalComponent
-{
-public:
-    intfExternalStemmer(){}
-
-    virtual QString getStem(const QString& _word) = 0;
-
-    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
-        return intfBaseExternalComponent::init("stem",_baseDir, _sourceLang, _targetLang) &&
-                this->configure(_configArgs);
-    }
-
-protected:
-    virtual bool configure(const QString& _configArgs){return true;}
-
-};
-
-#endif // INTFEXTERNALSTEMMER_H
+#if QT_VERSION >= 0x050000
+    #include <QJsonParseError>
+#endif //QT_VERSION

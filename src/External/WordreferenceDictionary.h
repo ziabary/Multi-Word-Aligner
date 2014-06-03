@@ -20,26 +20,40 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef INTFEXTERNALSTEMMER_H
-#define INTFEXTERNALSTEMMER_H
 
-#include "intfBaseExternal.hpp"
+#ifndef CLSWORDREFERENCE_H
+#define CLSWORDREFERENCE_H
 
-class intfExternalStemmer : virtual public intfBaseExternalComponent
+#include "Engine/intfExternalDictionary.hpp"
+#include "Engine/intfExternalStemmer.hpp"
+#include "External/JSON/JSONObject.h"
+
+class WordreferenceDictionary : public intfExternalDictionary, public intfExternalStemmer
 {
 public:
-    intfExternalStemmer(){}
-
-    virtual QString getStem(const QString& _word) = 0;
-
-    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
-        return intfBaseExternalComponent::init("stem",_baseDir, _sourceLang, _targetLang) &&
-                this->configure(_configArgs);
+    static inline WordreferenceDictionary* instance(){
+        return Instance ? Instance : (Instance = new WordreferenceDictionary);
     }
 
-protected:
-    virtual bool configure(const QString& _configArgs){return true;}
+    QStringList lookup(const QString &_word);
+    QString     getStem(const QString &_word);
 
+private:
+    void storeTranslation(const QJsonObject &_object);
+    QString downloadURL(const QString &_url);
+    void processData();
+
+    static size_t delDataDownloaded(char *_data, size_t _size, size_t _nmemb, void *);
+
+private:
+    WordreferenceDictionary();
+    static WordreferenceDictionary* Instance;
+
+    QStringList Translations;
+    QString     Stem;
+    QString Request;
+    static QByteArray DownloadedJson;
+    bool JustStem;
 };
 
-#endif // INTFEXTERNALSTEMMER_H
+#endif // CLSWORDREFERENCE_H

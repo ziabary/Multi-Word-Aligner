@@ -41,6 +41,8 @@ usage(void)
     cerr<<"\t-t target\n\t\tTarget language file"<<endl;
     cerr<<"\t-d dictionary\n\t\tSource to be used as external dictionary. Can be "<<Engine::instance().validDics().join(", ").toUtf8().constData()<<"(optional) "<<endl;
     cerr<<"\t-m stemmer\n\t\tSource to be used as external stemmer. Can be "<<Engine::instance().validDics().join(", ").toUtf8().constData()<<" (optional) "<<endl;
+    cerr<<"\t-D dictionaryArgs\n\t\tSemicolon Separated parameters passed to selected dictionary (optional)"<<endl;
+    cerr<<"\t-M stemmerArgs\n\t\tSemicolon Separated parameters passed to selected Stemmer (optional)"<<endl;
     cerr<<"\t-o output\n\t\tDirectory path used to store outputs"<<endl;
     exit(1);
 }
@@ -50,11 +52,13 @@ int main(int argc, char* argv[])
     char optTag;
     QString SourceLangFile;
     QString TargetLangFile;
+    QString ExternalDicArgs;
+    QString ExternalStemmerArgs;
     QString OutputDir = "./";
     intfExternalDictionary* ExternalDic = NULL;
     intfExternalStemmer*    ExternalStemmer = NULL;
 
-    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:")) != -1) {
+    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:")) != -1) {
         switch (optTag) {
         default:
             cerr<<"Bad option "<<optTag<<optarg<<endl;
@@ -79,6 +83,12 @@ int main(int argc, char* argv[])
                 cerr<<"Invalid Stemmer "<<optTag<<optarg<<endl;
                 usage();
             }
+        case 'D':
+            ExternalDicArgs = optarg;
+            break;
+        case 'M':
+            ExternalStemmerArgs = optarg;
+            break;
         case 'o':
             OutputDir = optarg;
             break;
@@ -100,7 +110,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!Engine::instance().initialize(ExternalDic, ExternalStemmer, OutputDir, SourceLangFile, TargetLangFile)){
+    if (!Engine::instance().initialize(ExternalDic, ExternalStemmer, OutputDir, SourceLangFile, TargetLangFile, ExternalDicArgs, ExternalStemmerArgs)){
         return 1;
     }
 

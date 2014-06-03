@@ -20,26 +20,41 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef INTFEXTERNALSTEMMER_H
-#define INTFEXTERNALSTEMMER_H
 
-#include "intfBaseExternal.hpp"
+#ifndef GLOSBEDIC_H
+#define GLOSBEDIC_H
 
-class intfExternalStemmer : virtual public intfBaseExternalComponent
+#include "Engine/intfExternalDictionary.hpp"
+#include "Engine/intfExternalStemmer.hpp"
+#include "External/JSON/JSONObject.h"
+
+class GlosbeDic : public intfExternalDictionary
 {
 public:
-    intfExternalStemmer(){}
-
-    virtual QString getStem(const QString& _word) = 0;
-
-    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
-        return intfBaseExternalComponent::init("stem",_baseDir, _sourceLang, _targetLang) &&
-                this->configure(_configArgs);
+    static inline GlosbeDic* instance(){
+        return Instance ? Instance : (Instance = new GlosbeDic);
     }
 
-protected:
-    virtual bool configure(const QString& _configArgs){return true;}
+    QStringList lookup(const QString &_word);
 
+private:
+    void storeTranslation(const QJsonArray &_array);
+    QString downloadURL(const QString &_url);
+    void processData();
+
+    static size_t delDataDownloaded(char *_data, size_t _size, size_t _nmemb, void *);
+
+private:
+    GlosbeDic();
+    static GlosbeDic* Instance;
+
+    QStringList Translations;
+    QString     Stem;
+    QString Request;
+    static QByteArray DownloadedJson;
+    QString FirstLangID;
+    QString SecondLangID;
+    QString OriginalWord;
 };
 
-#endif // INTFEXTERNALSTEMMER_H
+#endif // GLOSBEDIC_H

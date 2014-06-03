@@ -32,9 +32,14 @@ public:
 
     virtual QStringList lookup(const QString& _word) = 0;
 
-    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang){
-        return intfBaseExternalComponent::init("dic",_baseDir, _sourceLang, _targetLang);
+    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
+        return intfBaseExternalComponent::init("dic",_baseDir, _sourceLang, _targetLang) &&
+                this->configure(_configArgs);
     }
+
+protected:
+    virtual bool configure(const QString& _configArgs){return true;}
+
 private:
     quint32 LastInsertID;
 };

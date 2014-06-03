@@ -34,7 +34,10 @@ public:
     intfBaseExternalComponent(){}
 
 protected:
-    bool init(const QString& _type, const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang){
+    bool init(const QString& _type,
+              const QString& _baseDir,
+              const QString& _sourceLang,
+              const QString& _targetLang){
         this->SourceLang = _sourceLang;
         this->TargetLang = _targetLang;
         this->BaseDir = _baseDir;

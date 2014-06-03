@@ -75,14 +75,16 @@ bool Engine::initialize(intfExternalDictionary* _externDic,
                         intfExternalStemmer* _externStemmer,
                         const QString& _output,
                         const QString& _sourceLang,
-                        const QString& _targetLang)
+                        const QString& _targetLang,
+                        const QString& _externDicArgs,
+                        const QString& _externStemmerArgs)
 {
     this->ExternalDic = _externDic ? _externDic : CachedDictionary::instance();
     this->ExternalStemmer = _externStemmer ? _externStemmer : NullDicAndStemmer::instance();
     this->OutputDir = _output;
 
-    if (!this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang) ||
-        !this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang))
+    if (!this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs) ||
+        !this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs))
         return false;
     return true;
 }

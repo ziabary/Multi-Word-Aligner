@@ -20,26 +20,38 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef INTFEXTERNALSTEMMER_H
-#define INTFEXTERNALSTEMMER_H
 
-#include "intfBaseExternal.hpp"
+#ifndef GIZABASEDDIC_H
+#define GIZABASEDDIC_H
 
-class intfExternalStemmer : virtual public intfBaseExternalComponent
+#include "Engine/intfExternalDictionary.hpp"
+
+class GizaBasedDic : public intfExternalDictionary
 {
+    struct stuTranslation
+    {
+        QString Word;
+        qreal   Prob;
+        stuTranslation(const QString& _word = "", qreal _prob = 0)
+        {
+            this->Word = _word;
+            this->Prob = _prob;
+        }
+    };
+
 public:
-    intfExternalStemmer(){}
-
-    virtual QString getStem(const QString& _word) = 0;
-
-    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
-        return intfBaseExternalComponent::init("stem",_baseDir, _sourceLang, _targetLang) &&
-                this->configure(_configArgs);
+    static inline GizaBasedDic* instance(){
+        return Instance ? Instance : (Instance = new GizaBasedDic);
     }
 
-protected:
-    virtual bool configure(const QString& _configArgs){return true;}
+    QStringList lookup(const QString &_word);
+    bool configure(const QString &_configArgs);
 
+private:
+    GizaBasedDic();
+    static GizaBasedDic* Instance;
+
+    QHash<QString, stuTranslation> Dictionary;
 };
 
-#endif // INTFEXTERNALSTEMMER_H
+#endif // CLSWORDREFERENCE_H

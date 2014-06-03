@@ -29,14 +29,39 @@ HEADERS += \
     src/Engine/Engine.h \
     src/External/CachedDictionary.h \
     src/External/InteractiveDicAndStemmer.h \
-    src/External/NullDicAndStemmer.h
+    src/External/NullDicAndStemmer.h \
+    src/External/JSON/JSONArray.h \
+    src/External/JSON/JSONDocument.h \
+    src/External/JSON/JSONObject.h \
+    src/External/JSON/JSONParseError.h \
+    src/External/JSON/JSONValue.h \
+    src/External/JSON/Private/qjson_p.h \
+    src/External/JSON/Private/qjsonparser_p.h \
+    src/External/JSON/Private/qjsonwriter_p.h \
+    src/External/GizaBasedDic.h \
+    src/External/GlosbeDic.h \
+    src/External/GoogleTranslate.h \
+    src/External/WordnetStemmer.h \
+    src/External/WordreferenceDictionary.h
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
     src/main.cpp \
     src/Engine/Engine.cpp \
     src/External/CachedDictionary.cpp \
     src/External/NullDicAndStemmer.cpp \
-    src/External/InteractiveDicAndStemmer.cpp
+    src/External/InteractiveDicAndStemmer.cpp \
+    src/External/JSON/Private/qjson.cpp \
+    src/External/JSON/Private/qjsonarray.cpp \
+    src/External/JSON/Private/qjsondocument.cpp \
+    src/External/JSON/Private/qjsonobject.cpp \
+    src/External/JSON/Private/qjsonparser.cpp \
+    src/External/JSON/Private/qjsonvalue.cpp \
+    src/External/JSON/Private/qjsonwriter.cpp \
+    src/External/GizaBasedDic.cpp \
+    src/External/GlosbeDic.cpp \
+    src/External/GoogleTranslate.cpp \
+    src/External/WordnetStemmer.cpp \
+    src/External/WordreferenceDictionary.cpp
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 INCLUDEPATH += src
 
@@ -66,7 +91,7 @@ DEFINES += PROJ_VERSION=$$VERSION
 
 INCLUDEPATH  +=  $$ASM_INCLUDE
 QMAKE_LIBDIR +=  $$ASM_LIBPATH
-LIBS += -lASM
+LIBS += -lASM -lcurl
 
 
 
