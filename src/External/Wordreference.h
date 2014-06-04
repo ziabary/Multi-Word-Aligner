@@ -28,32 +28,47 @@
 #include "Engine/intfExternalStemmer.hpp"
 #include "External/JSON/JSONObject.h"
 
-class WordreferenceDictionary : public intfExternalDictionary, public intfExternalStemmer
+class clsWordreferenceBase : virtual public intfBaseExternalComponent
+{
+protected:
+    void processData(const QByteArray &_buff, const QString &_word, void *_resultStorage);
+    void add2Dic(const QString &_word, const QString& _translation, QStringList *_storage);
+    void configure(const QString &_configArgs);
+
+    QString Dir;
+};
+
+/**
+ * @brief The WordreferenceDic class
+ */
+class WordreferenceDic : public clsWordreferenceBase, intfExternalDictionary
 {
 public:
-    static inline WordreferenceDictionary* instance(){
-        return Instance ? Instance : (Instance = new WordreferenceDictionary);
+    static inline WordreferenceDic* instance(){
+        return Instance ? Instance : (Instance = new WordreferenceDic);
     }
 
     QStringList lookup(const QString &_word);
-    QString     getStem(const QString &_word);
 
 private:
-    void storeTranslation(const QJsonObject &_object);
-    QString downloadURL(const QString &_url);
-    void processData();
+    WordreferenceDic(){}
+    static WordreferenceDic* Instance;
+};
+/**
+ * @brief The WordreferenceStemmer class
+ */
+class WordreferenceStemmer : public clsWordreferenceBase, intfExternalStemmer
+{
+public:
+    static inline WordreferenceStemmer* instance(){
+        return Instance ? Instance : (Instance = new WordreferenceStemmer);
+    }
 
-    static size_t delDataDownloaded(char *_data, size_t _size, size_t _nmemb, void *);
+    QString getStem(const QString &_word);
 
 private:
-    WordreferenceDictionary();
-    static WordreferenceDictionary* Instance;
-
-    QStringList Translations;
-    QString     Stem;
-    QString Request;
-    static QByteArray DownloadedJson;
-    bool JustStem;
+    WordreferenceStemmer(){}
+    static WordreferenceStemmer* Instance;
 };
 
 #endif // CLSWORDREFERENCE_H

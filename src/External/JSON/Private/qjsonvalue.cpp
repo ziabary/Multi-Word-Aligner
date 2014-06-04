@@ -73,7 +73,7 @@ QT_BEGIN_NAMESPACE
     \o array QJsonValue::Array
     \o object QJsonValue::Object
     \o null QJsonValue::Null
-    \endlist
+    \std::endlist
 
     A value can represent any of the above data types. In addition, QJsonValue has one special
     flag to represent undefined values. This can be queried with isUndefined().
@@ -293,7 +293,7 @@ QJsonValue &QJsonValue::operator =(const QJsonValue &other)
     \o QVariant::StringList
     \o QVariant::VariantList to Array
     \o QVariant::VariantMap to Object
-    \endlist
+    \std::endlist
 
     For all other QVariant types a conversion to a QString will be attempted. If the returned string
     is empty, a Null QJsonValue will be stored, otherwise a String value using the returned QString.

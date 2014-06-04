@@ -34,7 +34,7 @@ public:
         return Instance ? *Instance : *(Instance = new Engine);
     }
 
-    bool initialize(intfExternalDictionary* _externDic,
+    void initialize(intfExternalDictionary* _externDic,
                     intfExternalStemmer* _externStemmer,
                     const QString& _output,
                     const QString &_sourceLang,

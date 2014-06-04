@@ -27,25 +27,41 @@
 #include <QHash>
 #include <QFile>
 #include <QTextStream>
+#include <curl/curl.h>
+#include "exMWABase.hpp"
+#include "Common.h"
+#include "ISO639.h"
+
+MWA_ADD_EXCEPTION_HANDLER(exExternComponent, exMWABase)
 
 class intfBaseExternalComponent
 {
 public:
     intfBaseExternalComponent(){}
 
+protected: //Virtuals
+    virtual void processData(const QByteArray& _buff, const QString& _word, void* _resultStorage){
+        Q_UNUSED(_buff);
+        Q_UNUSED(_word);
+        Q_UNUSED(_resultStorage);
+        throw exExternComponent("processData() must be implemented in subclasses");
+    }
+
 protected:
-    bool init(const QString& _type,
+    void init(const QString& _type,
               const QString& _baseDir,
               const QString& _sourceLang,
               const QString& _targetLang){
-        this->SourceLang = _sourceLang;
-        this->TargetLang = _targetLang;
+        this->SourceLang = _sourceLang.toLower();
+        this->TargetLang = _targetLang.toLower();
         this->BaseDir = _baseDir;
         this->CacheExtension = ".c" + _type;
-        return true;
+        if (!ISO639isValid(this->SourceLang.toAscii().constData()) ||
+            !ISO639isValid(this->TargetLang.toAscii().constData()))
+            throw exExternComponent("Invalid Source or Target language");
     }
 
-    virtual void loadCache()
+    void loadCache()
     {
         QFile File(this->BaseDir +this->SourceLang+"2"+this->TargetLang+ CacheExtension);
         if (File.open(QFile::ReadOnly))
@@ -63,7 +79,7 @@ protected:
         }
     }
 
-    virtual void add2Cache(const QString& _flWord, const QString& _translation)
+    void add2Cache(const QString& _flWord, const QString& _translation)
     {
         QFile File(this->BaseDir +this->SourceLang+"2"+this->TargetLang+"."+this->CacheExtension);
         if (File.open(QFile::Append))
@@ -75,8 +91,38 @@ protected:
         this->OldEntries.insertMulti(_flWord, _translation);
     }
 
-    QStringList checkCache(const QString& _word){
+    QStringList checkCache(const QString& _word) const {
         return this->OldEntries.values(_word);
+    }
+
+    QString downloadURL(const QString &_url, const QString& _input, void* _resultStorage) {
+        CURL * DownloadManager;
+        CURLcode Result;
+
+        QByteArray Storage;
+        DownloadManager = curl_easy_init();
+        if( DownloadManager)
+        {
+          curl_easy_setopt(DownloadManager, CURLOPT_URL, wmaPrintable(_url));
+          curl_easy_setopt(DownloadManager, CURLOPT_FOLLOWLOCATION, 1L);
+          curl_easy_setopt(DownloadManager,CURLOPT_WRITEFUNCTION, this->delDataDownloaded);
+          curl_easy_setopt(DownloadManager, CURLOPT_WRITEDATA, &Storage);
+
+          Result = curl_easy_perform(DownloadManager);
+          if(Result != CURLE_OK)
+              throw exExternComponent("lookup failed:" + QString(curl_easy_strerror(Result)));
+
+          this->processData(Storage, _input, _resultStorage);
+
+          curl_easy_cleanup(DownloadManager);
+        }
+        return "";
+    }
+
+private:
+    static size_t delDataDownloaded(char *_data, size_t _size, size_t _nMemb, void * _storage){
+        ((QByteArray*)_storage)->append(QByteArray::fromRawData(_data, _size*_nMemb));
+        return _size * _nMemb;
     }
 
 protected:

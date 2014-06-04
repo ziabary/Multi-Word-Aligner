@@ -20,51 +20,19 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#include "ExternUnitTest.h"
+#ifndef COMMON_H
+#define COMMON_H
 
-#include "External/CachedDictionary.h"
-#include "External/GizaBasedDic.h"
-#include "External/GlosbeDic.h"
-#include "External/GoogleTranslate.h"
-#include "External/NullDicAndStemmer.h"
-#include "External/WordreferenceDictionary.h"
+#include <iostream>
+using namespace std;
+#include <QString>
 
+static bool gWMAVerbose = false;
 
-
-void ExternUnitTest::CachedDic()
-{
-
+#define wmaDebug if(gWMAVerbose) std::cout
+static inline  const char* wmaPrintable(const QString& _str) {
+    (void)gWMAVerbose;  //suppress compiler warning
+    return _str.toUtf8().constData();
 }
 
-void ExternUnitTest::GizaDic()
-{
-
-}
-
-void ExternUnitTest::GlosbeDic()
-{
-
-}
-
-void ExternUnitTest::GoogleDic()
-{
-
-}
-
-void ExternUnitTest::WordnetStem()
-{
-
-}
-
-void ExternUnitTest::WordReferenceDic()
-{
-
-}
-
-void ExternUnitTest::WordReferenceStem()
-{
-
-}
-
-QTEST_MAIN(ExternUnitTest)
-
+#endif // COMMON_H

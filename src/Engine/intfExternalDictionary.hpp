@@ -25,6 +25,8 @@
 
 #include "intfBaseExternal.hpp"
 
+MWA_ADD_EXCEPTION_HANDLER(exExternDic, exExternComponent)
+
 class intfExternalDictionary : virtual public intfBaseExternalComponent
 {
 public:
@@ -32,13 +34,13 @@ public:
 
     virtual QStringList lookup(const QString& _word) = 0;
 
-    virtual bool init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
-        return intfBaseExternalComponent::init("dic",_baseDir, _sourceLang, _targetLang) &&
-                this->configure(_configArgs);
+    void init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
+         intfBaseExternalComponent::init("dic",_baseDir, _sourceLang, _targetLang);
+         this->configure(_configArgs);
     }
 
 protected:
-    virtual bool configure(const QString& _configArgs){return true;}
+    virtual void configure(const QString& _configArgs){Q_UNUSED(_configArgs)}
 
 private:
     quint32 LastInsertID;

@@ -27,6 +27,7 @@
 #include "External/CachedDictionary.h"
 #include "External/NullDicAndStemmer.h"
 #include "External/InteractiveDicAndStemmer.h"
+
 /**********************************/
 
 
@@ -71,7 +72,7 @@ Engine::Engine()
 {
 }
 
-bool Engine::initialize(intfExternalDictionary* _externDic,
+void Engine::initialize(intfExternalDictionary* _externDic,
                         intfExternalStemmer* _externStemmer,
                         const QString& _output,
                         const QString& _sourceLang,
@@ -83,10 +84,8 @@ bool Engine::initialize(intfExternalDictionary* _externDic,
     this->ExternalStemmer = _externStemmer ? _externStemmer : NullDicAndStemmer::instance();
     this->OutputDir = _output;
 
-    if (!this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs) ||
-        !this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs))
-        return false;
-    return true;
+    this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs);
+    this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs);
 }
 
 intfExternalDictionary* Engine::getDicInstance(const QString& _dic)

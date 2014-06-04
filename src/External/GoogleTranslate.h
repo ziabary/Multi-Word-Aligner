@@ -37,25 +37,16 @@ public:
     QStringList lookup(const QString &_word);
 
 private:
-    void storeTranslation(const QJsonArray &_array);
-    QString downloadURL(const QString &_url);
-    void processData();
-
-    static size_t delDataDownloaded(char *_data, size_t _size, size_t _nmemb, void *);
-
-    void add2Dic(const QString& _translation);
+    void processData(const QByteArray &_buff, const QString &_word, void *_resultStorage);
+    void add2Dic(const QString &_word, const QString& _translation, QStringList *_storage);
+    void configure(const QString &_configArgs);
 
 private:
     GoogleTranslate();
     static GoogleTranslate* Instance;
 
-    QStringList Translations;
-    QString     Stem;
-    QString Request;
-    static QByteArray DownloadedJson;
-    QString FirstLangID;
-    QString SecondLangID;
-    QString OriginalWord;
+    const char* FirstLangID;
+    const char* SecondLangID;
 };
 
 #endif // GOOGLETRANSLATE_H

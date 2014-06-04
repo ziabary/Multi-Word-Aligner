@@ -22,10 +22,11 @@
 
 #include <unistd.h>
 
-#include "Engine/Engine.h"
-#include <iostream>
 #include <QDir>
 #include <QFileInfo>
+#include "Common.h"
+#include "exMWABase.hpp"
+#include "Engine/Engine.h"
 
 #define ETS_STR_VALUE(_arg)      #_arg
 #define ETS_M2STR(_Macro) ETS_STR_VALUE(_Macro)
@@ -35,15 +36,18 @@ using namespace std;
 static void
 usage(void)
 {
-    cerr<<"Multi word aligner Ver:"<<ETS_M2STR(PROJ_VERSION)<<" Build: "<<__DATE__<<endl;
-    cerr<<"Usage:\nMWA arguments"<<endl;
-    cerr<<"\t-s source\n\t\tSource language file"<<endl;
-    cerr<<"\t-t target\n\t\tTarget language file"<<endl;
-    cerr<<"\t-d dictionary\n\t\tSource to be used as external dictionary. Can be "<<Engine::instance().validDics().join(", ").toUtf8().constData()<<"(optional) "<<endl;
-    cerr<<"\t-m stemmer\n\t\tSource to be used as external stemmer. Can be "<<Engine::instance().validDics().join(", ").toUtf8().constData()<<" (optional) "<<endl;
-    cerr<<"\t-D dictionaryArgs\n\t\tSemicolon Separated parameters passed to selected dictionary (optional)"<<endl;
-    cerr<<"\t-M stemmerArgs\n\t\tSemicolon Separated parameters passed to selected Stemmer (optional)"<<endl;
-    cerr<<"\t-o output\n\t\tDirectory path used to store outputs"<<endl;
+    std::cerr<<"Multi word aligner Ver:"<<ETS_M2STR(PROJ_VERSION)<<" Build: "<<__DATE__<<std::endl;
+    std::cerr<<"Usage:\nMWA arguments"<<std::endl;
+    std::cerr<<"\t-s source\n\t\tSource language file"<<std::endl;
+    std::cerr<<"\t-t target\n\t\tTarget language file"<<std::endl;
+    std::cerr<<"\t-d dictionary\n\t\tSource to be used as external dictionary. Can be "<<
+          wmaPrintable(Engine::instance().validDics().join(", "))<<"(optional) "<<std::endl;
+    std::cerr<<"\t-m stemmer\n\t\tSource to be used as external stemmer. Can be "<<
+          wmaPrintable(Engine::instance().validDics().join(", "))<<" (optional) "<<std::endl;
+    std::cerr<<"\t-D dictionaryArgs\n\t\tSemicolon Separated parameters passed to selected dictionary (optional)"<<std::endl;
+    std::cerr<<"\t-M stemmerArgs\n\t\tSemicolon Separated parameters passed to selected Stemmer (optional)"<<std::endl;
+    std::cerr<<"\t-o output\n\t\tDirectory path used to store outputs"<<std::endl;
+    std::cerr<<"\t-v \n\t\tbe verbose"<<std::endl;
     exit(1);
 }
 
@@ -58,10 +62,10 @@ int main(int argc, char* argv[])
     intfExternalDictionary* ExternalDic = NULL;
     intfExternalStemmer*    ExternalStemmer = NULL;
 
-    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:")) != -1) {
+    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:v")) != -1) {
         switch (optTag) {
         default:
-            cerr<<"Bad option "<<optTag<<optarg<<endl;
+            std::cerr<<"Bad option "<<optTag<<optarg<<std::endl;
             usage();
             break;
         case 's':
@@ -73,14 +77,14 @@ int main(int argc, char* argv[])
         case 'd':
             ExternalDic = Engine::instance().getDicInstance(optarg);
             if (ExternalDic == NULL){
-                cerr<<"Invalid Dic "<<optTag<<optarg<<endl;
+                std::cerr<<"Invalid Dic "<<optTag<<optarg<<std::endl;
                 usage();
             }
             break;
         case 'm':
             ExternalStemmer = Engine::instance().getStemmerInstance(optarg);
             if (ExternalStemmer == NULL){
-                cerr<<"Invalid Stemmer "<<optTag<<optarg<<endl;
+                std::cerr<<"Invalid Stemmer "<<optTag<<optarg<<std::endl;
                 usage();
             }
         case 'D':
@@ -92,6 +96,9 @@ int main(int argc, char* argv[])
         case 'o':
             OutputDir = optarg;
             break;
+        case 'v':
+            gWMAVerbose = true;
+            break;
         }
     }
 
@@ -99,19 +106,27 @@ int main(int argc, char* argv[])
 
     if(OutputDir.isEmpty() && FileInfo.isDir()){
         if (FileInfo.isWritable()){
-            cerr<<"Unable to use <"<<OutputDir.toUtf8().constData()<<"> for writing"<<endl;
+            std::cerr<<"Unable to use <"<<wmaPrintable(OutputDir)<<"> for writing"<<std::endl;
             return 1;
         }
     }else if (FileInfo.isFile()){
-        cerr<<"Unable to use file <"<<OutputDir.toUtf8().constData()<<"> as directory"<<endl;
+        std::cerr<<"Unable to use file <"<<wmaPrintable(OutputDir)<<"> as directory"<<std::endl;
         return 1;
     }else if (!QDir().mkpath(OutputDir)){
-        cerr<<"Unable to create path <"<<OutputDir.toUtf8().constData()<<">"<<endl;
+        std::cerr<<"Unable to create path <"<<wmaPrintable(OutputDir)<<">"<<std::endl;
         return 1;
     }
 
-    if (!Engine::instance().initialize(ExternalDic, ExternalStemmer, OutputDir, SourceLangFile, TargetLangFile, ExternalDicArgs, ExternalStemmerArgs)){
-        return 1;
+    try{
+        Engine::instance().initialize(ExternalDic,
+                                      ExternalStemmer,
+                                      OutputDir,
+                                      SourceLangFile,
+                                      TargetLangFile,
+                                      ExternalDicArgs,
+                                      ExternalStemmerArgs);
+    }catch(exMWABase& e){
+        std::cerr<<wmaPrintable(e.what())<<std::endl;
     }
 
     return 0;

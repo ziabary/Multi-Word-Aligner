@@ -25,7 +25,6 @@
 #define GLOSBEDIC_H
 
 #include "Engine/intfExternalDictionary.hpp"
-#include "Engine/intfExternalStemmer.hpp"
 #include "External/JSON/JSONObject.h"
 
 class GlosbeDic : public intfExternalDictionary
@@ -38,23 +37,15 @@ public:
     QStringList lookup(const QString &_word);
 
 private:
-    void storeTranslation(const QJsonArray &_array);
-    QString downloadURL(const QString &_url);
-    void processData();
-
-    static size_t delDataDownloaded(char *_data, size_t _size, size_t _nmemb, void *);
+    void configure(const QString &_configArgs);
+    void processData(const QByteArray& _buff, const QString& _word, void* _resultStorage);
 
 private:
     GlosbeDic();
     static GlosbeDic* Instance;
 
-    QStringList Translations;
-    QString     Stem;
-    QString Request;
-    static QByteArray DownloadedJson;
-    QString FirstLangID;
-    QString SecondLangID;
-    QString OriginalWord;
+    const char* FirstLangID;
+    const char* SecondLangID;
 };
 
 #endif // GLOSBEDIC_H

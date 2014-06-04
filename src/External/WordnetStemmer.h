@@ -24,6 +24,7 @@
 #ifndef WORDNETSTEMMER_H
 #define WORDNETSTEMMER_H
 
+#ifdef USE_WN
 #include "Engine/intfExternalStemmer.hpp"
 
 class WordnetStemmer : public intfExternalStemmer
@@ -36,9 +37,18 @@ public:
     QString     getStem(const QString &_word);
 
 private:
+    void configure(const QString &_configArgs);
+
+private:
     WordnetStemmer();
     static WordnetStemmer* Instance;
-    char Word[1000];
 };
 
+#else
+#include "NullDicAndStemmer.h"
+class WordnetStemmer : NullDicAndStemmer{
+
+};
+
+#endif // USE_WN
 #endif // WORDNETSTEMMER_H

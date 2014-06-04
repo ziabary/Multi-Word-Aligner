@@ -17,6 +17,7 @@
  # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #####################################################################
 ProjectName = "MWA"
+BasePath=..
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 Dependencies += ASM curl
@@ -34,19 +35,29 @@ QMAKE_CXXFLAGS += -std=c++0x
 ASM_LIBPATH=$$(HOME)/local/lib
 ASM_INCLUDE=$$(HOME)/local/include
 
+DEFINES+=USE_WN
+WN_LIBPATH=$$(HOME)/local/lib
+WN_INCLUDE=$$(HOME)/local/include
+
 ##########################################################
 ####          Do Not Change Anything Below            ####
 ##########################################################
 CONFIG += qtestlib
 TEMPLATE = app
 TARGET = unitTest
-DESTDIR = ../build
-OBJECTS_DIR = ../build/obj
-MOC_DIR = ../build/moc
+DESTDIR = $$BasePath/build
+OBJECTS_DIR = $$BasePath/build/obj
+MOC_DIR = $$BasePath/build/moc
 
 QT += core
 QT -= gui
 
-INCLUDEPATH  +=  $$ASM_INCLUDE
-QMAKE_LIBDIR +=  $$ASM_LIBPATH
-LIBS += -lASM -lcurl
+INCLUDEPATH  +=  $$ASM_INCLUDE $$WN_INCLUDE
+QMAKE_LIBDIR +=  $$ASM_LIBPATH $$WN_LIBPATH
+LIBS += -lASM -lcurl -lWN
+
+!exists($$WN_LIBPATH"/libWN.a") : !exists($$WN_LIBPATH"/libWN.so") {
+    message("Wordnet not found disabling it.")
+    DEFINES -= USE_WN
+    LIBS -= -lWN
+}

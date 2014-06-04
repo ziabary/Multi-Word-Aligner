@@ -35,24 +35,27 @@ QStringList GizaBasedDic::lookup(const QString &_word)
 {
     QStringList Out;
 
-    /*for(const stuTranslation& Translation : this->Dictionaries[_dir].values(_word))
-    {
+    for(const stuTranslation& Translation : this->Dictionary.values(_word))
         if (Translation.Prob > .1)
             Out<<Translation.Word;
-    }*/
     return Out;
 }
 
-bool GizaBasedDic::configure(const QString &_configArgs)
+void GizaBasedDic::configure(const QString &_configArgs)
 {
- /*   QFile File(_baseDir);
+    if (_configArgs.split(";").size() < 2)
+        throw exExternDic("Giza configuration not specified (GizaFilePath;MinProbToAccept)");
+
+    bool Ok;
+    qreal MinProb = _configArgs.split(";").last().toFloat(&Ok);
+    if (!Ok || MinProb <=0)
+        throw exExternDic("Invalid minimum probalbilty specified. ( 0<MinProb<1 )");
+
+    QFile File(_configArgs.split(";").first());
     QTextStream Text(&File);
     Text.setCodec("UTF-8");
     if (File.open(QFile::ReadOnly) == false)
-    {
-        qCritical("Unable to open %s file", qPrintable(_baseDir));
-        return false;
-    }
+        throw exExternDic("Unable to open GizaFile: <"+_configArgs +">");
 
     QString Line;
     QStringList LineParts;
@@ -72,7 +75,7 @@ bool GizaBasedDic::configure(const QString &_configArgs)
 
         if (LineParts.size() < 3 || LineParts.first().trimmed().toDouble() <= 0)
         {
-            qWarning("Invalid combination at line: %d", i);
+            wmaDebug<<"Invalid combination at line:"<<i<<std::endl;
             continue;
         }
 
@@ -80,15 +83,12 @@ bool GizaBasedDic::configure(const QString &_configArgs)
         SLWord = LineParts.last().trimmed();
         Count = LineParts.first().trimmed().toDouble();
 
-        this->Dictionaries[_sourceLang].insertMulti(FLWord, stuTranslation(SLWord, Count));
+        this->Dictionary.insertMulti(FLWord, stuTranslation(SLWord, Count));
         Summations.insert(FLWord, Summations.value(FLWord) + Count);
     }
 
-    for(auto DicIter = this->Dictionaries[_sourceLang].begin();
-        DicIter != this->Dictionaries[_sourceLang].end();
+    for(auto DicIter = this->Dictionary.begin();
+        DicIter != this->Dictionary.end();
         DicIter++)
-    {
-        qreal A = Summations.value(DicIter.key());
         DicIter.value().Prob /= Summations.value(DicIter.key());
-    }*/
 }

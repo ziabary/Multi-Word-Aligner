@@ -45,7 +45,9 @@ public:
     }
 
     QStringList lookup(const QString &_word);
-    bool configure(const QString &_configArgs);
+
+private:
+    void configure(const QString &_configArgs);
 
 private:
     GizaBasedDic();

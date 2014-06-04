@@ -23,52 +23,48 @@
 
 #include "WordnetStemmer.h"
 
+#ifdef USE_WN
 #include <iostream>
-//#include "wn.h"
+#include "wn.h"
 
 WordnetStemmer* WordnetStemmer::Instance = NULL;
 
 
 WordnetStemmer::WordnetStemmer()
-{
-//    wninit(); // TODO rais exception if failed
-}
-
+{}
 
 QString WordnetStemmer::getStem(const QString &_word)
 {
- /*   QString Stem;
-
+    QString Stem;
+    char Word[_word.toUtf8().size()];
     if (re_wninit())
-    {
-        std::cout<<"WordnetStemmer: "<<_word.toUtf8().constData()<<" -> "<<"ERROR"<<std::endl;
-        return "ERROR";
-    }
+        throw exExternStemmer("Unable to reinit wordnet");
 
-    strcpy(this->Word, _word.toUtf8().constData());
+    strcpy(Word, wmaPrintable(_word));
 
-    for(int i=1; i<5; i++)
-    {
-       char* Morphed = morphword(this->Word, i);
-       if (Morphed)
-       {
-           if (Stem.size() && Stem != Morphed)
-           {
-               std::cerr <<"What to do in stemmer: "<<Stem.toUtf8().constData()<<" - "<<Morphed<<std::endl;
-           }
-           else
+    for(int i=1; i<5; i++){
+       char* Morphed = morphword(Word, i);
+       if (Morphed){
+           if (Stem.size() && Stem != Morphed){
+               wmaDebug<<"What to do in stemmer: "<<wmaPrintable(Stem)<<" - "<<Morphed<<std::endl;
+           }else
                Stem = Morphed;
        }
     }
 
-    if (Stem.isEmpty())
-    {
-        std::cout<<"WordnetStemmer: "<<_word.toUtf8().constData()<<" -> "<<_word.toLower().toUtf8().constData()<<std::endl;
+    if (Stem.isEmpty()) {
+        wmaDebug<<"WordnetStemmer: "<<wmaPrintable(_word)<<" -> "<<wmaPrintable(_word.toLower())<<std::endl;
         return _word.toLower();
-    }
-    else
-    {
-        std::cout<<"WordnetStemmer: "<<_word.toUtf8().constData()<<" -> "<<Stem.toUtf8().constData()<<std::endl;
+    }else{
+        wmaDebug<<"WordnetStemmer: "<<wmaPrintable(_word)<<" -> "<<wmaPrintable(Stem)<<std::endl;
         return Stem;
-    }*/
+    }
 }
+
+void WordnetStemmer::configure(const QString &_configArgs)
+{
+    Q_UNUSED(_configArgs)
+    if (wninit())
+        throw exExternStemmer("Unable to initialize wordnet");
+}
+#endif

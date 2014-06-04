@@ -20,31 +20,51 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef NULLDICANDSTEMMER_H
-#define NULLDICANDSTEMMER_H
+#include "ExternUnitTest.h"
 
-#include "Engine/intfExternalDictionary.hpp"
-#include "Engine/intfExternalStemmer.hpp"
+#include "External/CachedDictionary.h"
+#include "External/GizaBasedDic.h"
+#include "External/GlosbeDic.h"
+#include "External/GoogleTranslate.h"
+#include "External/NullDicAndStemmer.h"
+#include "External/Wordreference.h"
 
-class NullDicAndStemmer : public intfExternalDictionary, public intfExternalStemmer
+
+
+void ExternUnitTest::CachedDic()
 {
-public:
-    static inline NullDicAndStemmer* instance(){
-        return Instance ? Instance : (Instance = new NullDicAndStemmer);
-    }
 
-    inline QStringList lookup(const QString &_word){
-        Q_UNUSED(_word)
-        return QStringList();
-    }
+}
 
-    QString     getStem(const QString &_word){
-        return _word;
-    }
+void ExternUnitTest::GizaDic()
+{
 
-private:
-    NullDicAndStemmer();
-    static NullDicAndStemmer* Instance;
-};
+}
 
-#endif // NULLDICANDSTEMMER_H
+void ExternUnitTest::GlosbeDic()
+{
+
+}
+
+void ExternUnitTest::GoogleDic()
+{
+
+}
+
+void ExternUnitTest::WordnetStem()
+{
+
+}
+
+void ExternUnitTest::WordReferenceDic()
+{
+
+}
+
+void ExternUnitTest::WordReferenceStem()
+{
+
+}
+
+QTEST_MAIN(ExternUnitTest)
+

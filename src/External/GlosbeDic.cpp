@@ -23,134 +23,57 @@
 
 #include "GlosbeDic.h"
 
-#include <iostream>
 #include <curl/curl.h>
 #include "External/JSON/JSONDocument.h"
 #include "External/JSON/JSONObject.h"
 #include "External/JSON/JSONArray.h"
-
-using namespace std;
+#include "Common.h"
 
 GlosbeDic* GlosbeDic::Instance = NULL;
-QByteArray GlosbeDic::DownloadedJson;
 
 GlosbeDic::GlosbeDic() :
     intfExternalDictionary()
-{
-    this->loadCache();
-}
+{}
 
 QStringList GlosbeDic::lookup(const QString &_word)
 {
-    /*this->Translations.clear();
-    this->Stem.clear();
-    this->Request = _word;
-
-    switch(_dir)
+    wmaDebug<<"[Glosbe] Looking Up: "<<wmaPrintable(_word)<<std::endl;
+    QStringList Result;
+    Result = this->checkCache(_word);
+    if (Result.size())
     {
-    case enuTranslationDir::En2De:
-        this->FirstLangID  = "eng";
-        this->SecondLangID = "deu";
-        break;
-
-    case enuTranslationDir::De2En:
-        this->FirstLangID  = "deu";
-        this->SecondLangID = "eng";
-        break;
-
-    default:
-        std::cerr<<"glosbe.com invalid language combination"<<std::endl;
-        return QStringList();
+        wmaDebug<<"\t found in cache. "<<std::endl;
+        return Result;
     }
 
-    std::cout<<"glosbe.com Translating: "<<_word.toUtf8().constData()<<std::endl;
-    this->Translations = this->checkCache(_word);
-    if (this->Translations.size())
-    {
-        std::cout<<"\t found in cache. "<<std::endl;
-        return this->Translations;
-    }
+    this->downloadURL(QString("http://glosbe.com/gapi/translate?format=json&pretty=false"
+                              "&from=%1&dest=%2&phrase=%3").arg(
+                          this->FirstLangID).arg(
+                          this->SecondLangID).arg(_word),
+                      _word,
+                      &Result);
 
-    this->OriginalWord = _word;
-    this->downloadURL("http://glosbe.com/gapi/translate?from="+
-                      this->FirstLangID+"&dest="+
-                      this->SecondLangID+"&format=json&phrase="+_word+"&pretty=true");
-*/
-    return this->Translations;
+    return Result;
 }
 
-void GlosbeDic::storeTranslation(const QJsonArray &_array)
+void GlosbeDic::configure(const QString &_configArgs)
 {
-    for (QJsonValue ArrayIterValue : _array)
-    {
-        QJsonObject JsonObject = ArrayIterValue.toObject();
-
-        for(auto ObjectIter = JsonObject.constBegin();
-            ObjectIter != JsonObject.constEnd();
-            ObjectIter++)
-        {
-            if(ObjectIter.key().toLower().startsWith("phrase")) {
-                if (ObjectIter.value().toObject().value("language").toString() == this->SecondLangID)
-                {
-                    QString Translation = ObjectIter.value().toObject().value("text").toString();
-                    this->Translations.append(Translation.trimmed());
-                    std::cout<<"\tGlosbe: "<<Translation.toUtf8().constData()<<std::endl;
-                    this->add2Cache(this->OriginalWord, Translation);
-                }
-            }else if(ObjectIter.key().toLower() == "authors") {
-            }else if(ObjectIter.key().toLower() == "meaningid") {
-            }else if(ObjectIter.key().toLower() == "meanings") {
-            }else
-                cerr<<"Unkwon Tag2: "<<ObjectIter.key().toUtf8().constData();
-        }
-    }
+    Q_UNUSED(_configArgs)
+    this->FirstLangID = ISO639getAlpha3B(this->SourceLang.toAscii().constData());
+    this->SecondLangID = ISO639getAlpha3B(this->TargetLang.toAscii().constData());
+    this->loadCache();
 }
 
-QString GlosbeDic::downloadURL(const QString &_url)
-{
-    CURL * DownloadManager;
-    CURLcode Result;
-
-    this->DownloadedJson.clear();
-     DownloadManager = curl_easy_init();
-    if( DownloadManager)
-    {
-      curl_easy_setopt( DownloadManager, CURLOPT_URL, _url.toUtf8().constData());
-      curl_easy_setopt( DownloadManager, CURLOPT_FOLLOWLOCATION, 1L);
-      curl_easy_setopt(DownloadManager,CURLOPT_WRITEFUNCTION, this->delDataDownloaded);
-
-      /* Perform the request, res will get the return code */
-      Result = curl_easy_perform(DownloadManager);
-      /* Check for errors */
-      if(Result != CURLE_OK)
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(Result));
-
-      this->processData();
-      /* always cleanup */
-      curl_easy_cleanup(DownloadManager);
-    }
-    return 0;
-}
-
-size_t GlosbeDic::delDataDownloaded(char *_data, size_t _size, size_t _nmemb, void *)
-{
-    DownloadedJson+=QByteArray::fromRawData(_data, _size*_nmemb);
-    return _size*_nmemb;
-}
-
-void GlosbeDic::processData()
+void GlosbeDic::processData(const QByteArray& _buff, const QString& _word, void* _resultStorage)
 {
     QJsonParseError Error;
+    QStringList* Storage = (QStringList*)_resultStorage;
 
-    QJsonDocument JSonDoc = QJsonDocument::fromJson(this->DownloadedJson, &Error);
+    QJsonDocument JSonDoc = QJsonDocument::fromJson(_buff, &Error);
     if (Error.error != QJsonParseError::NoError)
-    {
-        cerr<<(Error.errorString() + QString::number(Error.offset)).toUtf8().constData();
-        return;
-    }
+        throw ("[Glosbe] Json Parse Error" + Error.errorString() + QString::number(Error.offset));
 
-    if (JSonDoc.isObject())
-    {
+    if (JSonDoc.isObject()){
         QJsonObject JsonObject = JSonDoc.object();
 
         for(auto ObjectIter = JsonObject.constBegin();
@@ -158,16 +81,35 @@ void GlosbeDic::processData()
             ObjectIter++)
         {
             if(ObjectIter.key().toLower().startsWith("tuc")) {
-                this->storeTranslation(ObjectIter.value().toArray());
+                for (QJsonValue ArrayIterValue : ObjectIter.value().toArray())
+                {
+                    QJsonObject JsonObject = ArrayIterValue.toObject();
+
+                    for(auto ObjectIter = JsonObject.constBegin();
+                        ObjectIter != JsonObject.constEnd();
+                        ObjectIter++)
+                    {
+                        if(ObjectIter.key().toLower().startsWith("phrase")) {
+                            if (ObjectIter.value().toObject().value("language").toString() == this->SecondLangID)
+                            {
+                                QString Translation = ObjectIter.value().toObject().value("text").toString();
+                                Storage->append(Translation.trimmed());
+                                this->add2Cache(_word, Translation);
+                            }
+                        }else if(ObjectIter.key().toLower() == "authors") {
+                        }else if(ObjectIter.key().toLower() == "meaningid") {
+                        }else if(ObjectIter.key().toLower() == "meanings") {
+                        }else
+                            wmaDebug<<"[Glosbe] Unkwon JSON Tag2: "<<wmaPrintable(ObjectIter.key())<<std::endl;
+                    }
+                }
             }else if(ObjectIter.key().toLower() == "result") {
             }else if(ObjectIter.key().toLower() == "dest") {
             }else if(ObjectIter.key().toLower() == "from") {
             }else if(ObjectIter.key().toLower() == "phrase") {
             }else
-                cerr<<"Unkwon Tag1: "<<ObjectIter.key().toUtf8().constData();
+                wmaDebug<<"[Glosbe] Unkwon JSON Tag1: "<<wmaPrintable(ObjectIter.key())<<std::endl;
         }
     }
-
-    return ;
 }
 
