@@ -44,6 +44,8 @@ public:
                     const QString &_sourceLang,
                     const QString &_targetLang, const QString &_externDicArgs, const QString &_externStemmerArgs);
 
+    void process(const QString& _sourceFile, const QString& _targetFile);
+
     intfExternalDictionary* getDicInstance(const QString& _dic);
     intfExternalStemmer* getStemmerInstance(const QString& _dic);
     QStringList validStemmers();

@@ -21,9 +21,55 @@
  */
 
 #include "Knowledge.h"
+#include <QStringList>
+#include "Common.h"
 
 Knowledge* Knowledge::Instance = NULL;
 
-Knowledge::Knowledge()
+void Knowledge::init()
 {
+    this->MaxWordID=0;
+    this->getIDByToken(TOKEN_START); //Special Token used for start
+    this->getIDByToken(TOKEN_END); //Special Token used for end
+
+    this->ASM = new clsASM(); //TODO Maybe its good to enable configuration
 }
+
+quint32 Knowledge::getIDByToken(const QString &_token)
+{
+    quint32 ID = this->Token2ID.value(_token);
+     if(!ID){
+         this->MaxWordID++;
+         this->Token2ID.insert(_token, MaxWordID);
+         this->ID2token.insert(MaxWordID, _token);
+     }
+     return MaxWordID;
+}
+
+QString Knowledge::getTokenByID(quint32 _id)
+{
+    return this->ID2token.value(_id);
+}
+
+QStringList Knowledge::predictNextTokens(const QString &_token)
+{
+    QStringList PredictedTokens;
+    const std::unordered_set<ColID_t>& Prediction =
+            this->ASM->executeOnce(this->getIDByToken(_token));
+    for(ColID_t Predicted : Prediction)
+        PredictedTokens.append(this->getTokenByID(Predicted));
+}
+
+void Knowledge::save(const QString &_baseDir)
+{
+
+}
+
+void Knowledge::load(const QString &_baseDir)
+{
+
+}
+
+Knowledge::Knowledge()
+{}
+

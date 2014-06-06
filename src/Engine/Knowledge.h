@@ -29,13 +29,20 @@
 
 class Knowledge
 {
+public:
     static inline Knowledge& instance(){
         return Instance ? *Instance : *(Instance = new Knowledge);
     }
 
-    inline quint32 getTokenID(const QString& _token){
+    void init();
 
-    }
+    quint32 getIDByToken(const QString& _token);
+    QString getTokenByID(quint32 _id);
+
+    QStringList predictNextTokens(const QString& _token);
+
+    void save(const QString& _baseDir);
+    void load(const QString& _baseDir);
 
 private:
     Knowledge();
@@ -45,7 +52,7 @@ private:
     QHash<quint32, QString> ID2token;
     QHash<QString,quint32> Token2ID;
 
-    clsASM* MultiWords;
+    clsASM* ASM;
 };
 
 #endif // KNOWLEDGE_H

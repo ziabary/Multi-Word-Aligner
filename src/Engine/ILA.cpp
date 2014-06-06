@@ -27,3 +27,37 @@ ILA* ILA::Instance = NULL;
 ILA::ILA()
 {
 }
+
+
+void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
+{
+}
+
+void ILA::reserve(QStringList::Iterator &_firstLangWord, const QList<QStringList::Iterator> &_secondLangWords, bool _isAccepted)
+{
+}
+
+void ILA::reserve(QStringList::Iterator &_flwStart, QStringList::Iterator &_flwEnd, const QList<QStringList::Iterator> &_secondLangWords, bool _isAccepted)
+{
+}
+
+void ILA::add2SequenceDic(const QString &_firstLangWords, const QList<stuReservedTranslation> &_secondLangWords)
+{
+}
+
+void ILA::add2SequenceDic(const QString &_firstLangWords, const QString &_translation)
+{
+}
+
+bool ILA::areSameTranslations(const QString &_flWords, const QList<stuReservedTranslation> &_suggestedTranslation)
+{
+}
+
+QStringList ILA::getPredictionByKnowledge(const QStringList &_phrasePart, bool _isFirstRequest)
+{
+}
+
+quint16 ILA::merge(quint16 _currIter, quint16 _nextIter, quint16 _firstIdenticalWordIdx)
+{
+}
+

@@ -23,12 +23,76 @@
 #ifndef ILA_H
 #define ILA_H
 #include <QString>
+#include <QStringList>
 
 class ILA
 {
+private:
+    struct stuReservedTranslation
+    {
+        QStringList::Iterator Iter;
+        bool IsCleared;
+
+        stuReservedTranslation(QStringList::Iterator _secondLangIter,
+                               bool _IsCleared = false)
+        {
+            this->Iter = _secondLangIter;
+            this->IsCleared = _IsCleared;
+        }
+    };
+
+    struct stuReservation
+    {
+        QStringList::Iterator FirstLangIter;
+        QString FirstLangWords;
+        bool IsSequence;
+        bool AcceptedSequence;
+        bool WasAccepted;
+        QList<stuReservedTranslation> SecondLangWords;
+
+        stuReservation(QStringList::Iterator _firstLangIter,
+                       const QList<stuReservedTranslation>& _secondLangReserved,
+                       bool _accepted,
+                       const QString _firstLangWords = "")
+        {
+            this->FirstLangIter =_firstLangIter;
+            this->FirstLangWords = _firstLangWords.isEmpty() ? *_firstLangIter : _firstLangWords;
+            this->SecondLangWords = _secondLangReserved;
+            this->IsSequence = false;
+            this->WasAccepted = _accepted;
+            this->AcceptedSequence = _firstLangWords.size() ? true : false;
+        }
+    };
+
+public:
     static inline ILA& instance(){
         return Instance ? *Instance : *(Instance = new ILA);
     }
+
+    void process(const QString &_flPhrase,
+                 const QString& _slPhrase);
+
+private:
+    void reserve(QStringList::Iterator &_firstLangWord,
+                 const QList<QStringList::Iterator> &_secondLangWords,
+                 bool _isAccepted);
+    void reserve(QStringList::Iterator &_flwStart,
+                 QStringList::Iterator &_flwEnd,
+                 const QList<QStringList::Iterator> &_secondLangWords, bool _isAccepted);
+
+    void add2SequenceDic(const QString& _firstLangWords,
+                         const QList<stuReservedTranslation> &_secondLangWords);
+    void add2SequenceDic(const QString &_firstLangWords,
+                         const QString &_translation);
+
+    bool areSameTranslations(const QString& _flWords,
+                             const QList<stuReservedTranslation>& _suggestedTranslation);
+
+    QStringList getPredictionByKnowledge(const QStringList &_phrasePart,
+                                         bool _isFirstRequest = false);
+    quint16 merge(quint16 _currIter,
+                  quint16 _nextIter,
+                  quint16 _firstIdenticalWordIdx);
 
 private:
     ILA();

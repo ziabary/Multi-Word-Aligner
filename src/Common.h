@@ -35,4 +35,8 @@ static inline  const char* wmaPrintable(const QString& _str) {
     return _str.toUtf8().constData();
 }
 
+#define TOKEN_START " S "
+#define TOKEN_END " E "
+#define TOKEN_COUNT_PATTERN " %1 "
+
 #endif // COMMON_H

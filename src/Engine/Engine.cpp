@@ -23,6 +23,9 @@
 
 #include "Engine.h"
 
+#include "Knowledge.h"
+#include "ILA.h"
+
 /**********************************/
 #include "External/CachedDictionary.h"
 #include "External/NullDicAndStemmer.h"
@@ -107,6 +110,39 @@ void Engine::initialize(intfExternalDictionary* _externDic,
 
     this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs);
     this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs);
+
+    Knowledge::instance().init();
+}
+
+void Engine::process(const QString &_sourceFile, const QString &_targetFile)
+{
+    QFile SourceFile(_sourceFile);
+    if (!SourceFile.open(QFile::ReadOnly))
+        throw exEngine("Unable to open source file: <" + _sourceFile + "> for reading");
+    QFile TargetFile(_targetFile);
+    if (!TargetFile.open(QFile::ReadOnly))
+        throw exEngine("Unable to open target file: <" + _targetFile + "> for reading");
+
+    QTextStream SourceStream(&SourceFile);
+    SourceStream.setCodec("UTF-8");
+
+    QTextStream TargetStream(&TargetFile);
+    TargetStream.setCodec("UTF-8");
+
+    QString SourceLine;
+    QString TargetLine;
+
+    Knowledge::instance().load(this->OutputDir);
+
+    while(!SourceStream.atEnd() && ! TargetStream.atEnd()){
+        SourceLine = SourceStream.readLine().trimmed();
+        TargetLine = TargetStream.readLine().trimmed();
+
+        ILA::instance().process(SourceLine, TargetLine);
+
+        Knowledge::instance().save(this->OutputDir);
+    }
+
 }
 
 intfExternalDictionary* Engine::getDicInstance(const QString& _dic)
