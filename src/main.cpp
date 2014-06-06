@@ -31,19 +31,20 @@
 #define ETS_STR_VALUE(_arg)      #_arg
 #define ETS_M2STR(_Macro) ETS_STR_VALUE(_Macro)
 
-using namespace std;
+#define DEFAULT_SOURCE_LANGUAE "en"
+#define DEFAULT_TARGET_LANGUAE "es"
 
 static void
 usage(void)
 {
     std::cerr<<"Multi word aligner Ver:"<<ETS_M2STR(PROJ_VERSION)<<" Build: "<<__DATE__<<std::endl;
-    std::cerr<<"Usage:\nMWA arguments"<<std::endl;
-    std::cerr<<"\t-s source\n\t\tSource language file"<<std::endl;
-    std::cerr<<"\t-t target\n\t\tTarget language file"<<std::endl;
+    std::cerr<<"Usage:\nMWA [options] SourcePath TargetPath"<<std::endl;
+    std::cerr<<"\t-s sourceLang\n\t\tSource language (ISO639) (Default: "<<DEFAULT_SOURCE_LANGUAE<<")"<<std::endl;
+    std::cerr<<"\t-t targetLag\n\t\tTarget language (ISO639) (Default: "<<DEFAULT_TARGET_LANGUAE<<")"<<std::endl;
     std::cerr<<"\t-d dictionary\n\t\tSource to be used as external dictionary. Can be "<<
-          wmaPrintable(Engine::instance().validDics().join(", "))<<"(optional) "<<std::endl;
-    std::cerr<<"\t-m stemmer\n\t\tSource to be used as external stemmer. Can be "<<
           wmaPrintable(Engine::instance().validDics().join(", "))<<" (optional) "<<std::endl;
+    std::cerr<<"\t-m stemmer\n\t\tSource to be used as external stemmer. Can be "<<
+          wmaPrintable(Engine::instance().validStemmers().join(", "))<<" (optional) "<<std::endl;
     std::cerr<<"\t-D dictionaryArgs\n\t\tSemicolon Separated parameters passed to selected dictionary (optional)"<<std::endl;
     std::cerr<<"\t-M stemmerArgs\n\t\tSemicolon Separated parameters passed to selected Stemmer (optional)"<<std::endl;
     std::cerr<<"\t-o output\n\t\tDirectory path used to store outputs"<<std::endl;
@@ -54,37 +55,37 @@ usage(void)
 int main(int argc, char* argv[])
 {
     char optTag;
-    QString SourceLangFile;
-    QString TargetLangFile;
+    QString SourceLanguge = DEFAULT_SOURCE_LANGUAE;
+    QString TargetLanguage = DEFAULT_TARGET_LANGUAE;
     QString ExternalDicArgs;
     QString ExternalStemmerArgs;
     QString OutputDir = "./";
     intfExternalDictionary* ExternalDic = NULL;
     intfExternalStemmer*    ExternalStemmer = NULL;
 
-    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:v")) != -1) {
+    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:vh")) != -1) {
         switch (optTag) {
         default:
             std::cerr<<"Bad option "<<optTag<<optarg<<std::endl;
             usage();
             break;
         case 's':
-            SourceLangFile = optarg;
+            SourceLanguge = optarg;
             break;
         case 't':
-            TargetLangFile = optarg;
+            TargetLanguage = optarg;
             break;
         case 'd':
             ExternalDic = Engine::instance().getDicInstance(optarg);
             if (ExternalDic == NULL){
-                std::cerr<<"Invalid Dic "<<optTag<<optarg<<std::endl;
+                std::cerr<<"Invalid Dic: "<<optarg<<std::endl;
                 usage();
             }
             break;
         case 'm':
             ExternalStemmer = Engine::instance().getStemmerInstance(optarg);
             if (ExternalStemmer == NULL){
-                std::cerr<<"Invalid Stemmer "<<optTag<<optarg<<std::endl;
+                std::cerr<<"Invalid Stemmer: "<<optarg<<std::endl;
                 usage();
             }
         case 'D':
@@ -99,16 +100,28 @@ int main(int argc, char* argv[])
         case 'v':
             gWMAVerbose = true;
             break;
+        case 'h':
+            usage();
+            break;
         }
     }
 
+    if (optind + 2 > argc){
+        std::cerr<<"No file specified as iput"<<std::endl;
+        usage();
+    }
+
+    const char* SourceLangFile = argv[optind];
+    const char* TargetLangFile = argv[optind + 1];
+
     QFileInfo FileInfo(OutputDir);
 
-    if(OutputDir.isEmpty() && FileInfo.isDir()){
-        if (FileInfo.isWritable()){
-            std::cerr<<"Unable to use <"<<wmaPrintable(OutputDir)<<"> for writing"<<std::endl;
-            return 1;
-        }
+    if(OutputDir.isEmpty()){
+        std::cerr<<"Unable to use <> for writing"<<std::endl;
+        return 1;
+/*    }else if (FileInfo.isDir() && FileInfo.permissions()){
+        std::cerr<<"Unable to use <"<<wmaPrintable(OutputDir)<<"> for writing"<<std::endl;
+        return 1;*/
     }else if (FileInfo.isFile()){
         std::cerr<<"Unable to use file <"<<wmaPrintable(OutputDir)<<"> as directory"<<std::endl;
         return 1;
@@ -121,12 +134,15 @@ int main(int argc, char* argv[])
         Engine::instance().initialize(ExternalDic,
                                       ExternalStemmer,
                                       OutputDir,
-                                      SourceLangFile,
-                                      TargetLangFile,
+                                      SourceLanguge,
+                                      TargetLanguage,
                                       ExternalDicArgs,
                                       ExternalStemmerArgs);
     }catch(exMWABase& e){
-        std::cerr<<wmaPrintable(e.what())<<std::endl;
+        std::cerr<<e.what().toStdString().c_str()<<std::endl;
+    }
+    catch(...){
+        std::cerr<<"Fatal Exception"<<std::endl;
     }
 
     return 0;

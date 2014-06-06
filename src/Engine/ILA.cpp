@@ -20,51 +20,10 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#include "ExternUnitTest.h"
+#include "ILA.h"
 
-#include "External/CachedDictionary.h"
-#include "External/GizaBasedDic.h"
-#include "External/GlosbeDic.h"
-#include "External/GoogleTranslate.h"
-#include "External/NullDicAndStemmer.h"
-#include "External/Wordreference.h"
+ILA* ILA::Instance = NULL;
 
-
-
-void ExternUnitTest::CachedDic()
+ILA::ILA()
 {
-
 }
-
-void ExternUnitTest::GizaDic()
-{
-
-}
-
-void ExternUnitTest::GlosbeDic()
-{
-
-}
-
-void ExternUnitTest::GoogleDic()
-{
-
-}
-
-void ExternUnitTest::WordnetStem()
-{
-
-}
-
-void ExternUnitTest::WordReferenceDic()
-{
-
-}
-
-void ExternUnitTest::WordReferenceStem()
-{
-
-}
-
-QTEST_MAIN(ExternUnitTest)
-

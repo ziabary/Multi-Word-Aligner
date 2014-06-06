@@ -39,9 +39,6 @@ public:
          this->configure(_configArgs);
     }
 
-protected:
-    virtual void configure(const QString& _configArgs){Q_UNUSED(_configArgs)}
-
 private:
     quint32 LastInsertID;
 };

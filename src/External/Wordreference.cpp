@@ -25,7 +25,7 @@
 
 #include <iostream>
 #include <curl/curl.h>
-#include "External/JSON/JSONDocument.h"
+#include "libQJSON/JSONDocument.h"
 
 using namespace std;
 WordreferenceDic* WordreferenceDic::Instance = NULL;

@@ -24,9 +24,13 @@
 #define ENGINE_H
 
 #include <QString>
+#include "exMWABase.hpp"
 class intfExternalDictionary;
 class intfExternalStemmer;
+class Knowledge;
+class ILA;
 
+MWA_ADD_EXCEPTION_HANDLER(exEngine, exMWABase)
 class Engine
 {
 public:
@@ -52,6 +56,9 @@ private:
     intfExternalDictionary* ExternalDic;
     intfExternalStemmer*    ExternalStemmer;
     QString                 OutputDir;
+
+    friend class Knowledge;
+    friend class ILA;
 };
 
 #endif // ENGINE_H

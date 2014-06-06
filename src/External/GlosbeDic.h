@@ -25,7 +25,7 @@
 #define GLOSBEDIC_H
 
 #include "Engine/intfExternalDictionary.hpp"
-#include "External/JSON/JSONObject.h"
+#include "libQJSON/JSONObject.h"
 
 class GlosbeDic : public intfExternalDictionary
 {

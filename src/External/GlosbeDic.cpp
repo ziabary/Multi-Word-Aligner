@@ -24,9 +24,9 @@
 #include "GlosbeDic.h"
 
 #include <curl/curl.h>
-#include "External/JSON/JSONDocument.h"
-#include "External/JSON/JSONObject.h"
-#include "External/JSON/JSONArray.h"
+#include "libQJSON/JSONDocument.h"
+#include "libQJSON/JSONObject.h"
+#include "libQJSON/JSONArray.h"
 #include "Common.h"
 
 GlosbeDic* GlosbeDic::Instance = NULL;

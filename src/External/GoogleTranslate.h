@@ -25,7 +25,7 @@
 
 #include "Engine/intfExternalDictionary.hpp"
 #include "Engine/intfExternalStemmer.hpp"
-#include "External/JSON/JSONObject.h"
+#include "libQJSON/JSONObject.h"
 
 class GoogleTranslate : public intfExternalDictionary
 {

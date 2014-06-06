@@ -47,6 +47,8 @@ protected: //Virtuals
         throw exExternComponent("processData() must be implemented in subclasses");
     }
 
+    virtual void configure(const QString& _configArgs){Q_UNUSED(_configArgs)}
+
 protected:
     void init(const QString& _type,
               const QString& _baseDir,

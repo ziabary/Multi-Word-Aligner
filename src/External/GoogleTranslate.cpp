@@ -25,9 +25,9 @@
 
 #include <iostream>
 #include <curl/curl.h>
-#include "External/JSON/JSONDocument.h"
-#include "External/JSON/JSONObject.h"
-#include "External/JSON/JSONArray.h"
+#include "libQJSON/JSONDocument.h"
+#include "libQJSON/JSONObject.h"
+#include "libQJSON/JSONArray.h"
 
 using namespace std;
 

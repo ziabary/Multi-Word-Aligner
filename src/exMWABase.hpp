@@ -23,10 +23,11 @@
 #ifndef EXMWABASE_HPP
 #define EXMWABASE_HPP
 
-#include <qtconcurrentexception.h>
 #include <QString>
+#include <Common.h>
+#include <stdexcept>
 
-class exMWABase: public QtConcurrent::Exception
+class exMWABase: public std::exception
 {
   public:
     /**
@@ -37,14 +38,6 @@ class exMWABase: public QtConcurrent::Exception
      **/
     exMWABase(const QString& _message = "", quint32 _line = 0) throw (){
         this->Message = _line ? QString::number(_line) + ": " + _message : _message;
-    }
-
-    void raise() const{
-        throw *this;
-    }
-
-    QtConcurrent::Exception* clone(){
-        return new exMWABase(*this);
     }
 
     /**

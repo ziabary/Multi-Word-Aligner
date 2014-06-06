@@ -20,24 +20,10 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef INTFEXTERNALSTEMMER_H
-#define INTFEXTERNALSTEMMER_H
+#include "Knowledge.h"
 
-#include "intfBaseExternal.hpp"
+Knowledge* Knowledge::Instance = NULL;
 
-MWA_ADD_EXCEPTION_HANDLER(exExternStemmer, exMWABase)
-
-class intfExternalStemmer : virtual public intfBaseExternalComponent
+Knowledge::Knowledge()
 {
-public:
-    intfExternalStemmer(){}
-
-    virtual QString getStem(const QString& _word) = 0;
-
-    void init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
-        intfBaseExternalComponent::init("stem",_baseDir, _sourceLang, _targetLang);
-        this->configure(_configArgs);
-    }
-};
-
-#endif // INTFEXTERNALSTEMMER_H
+}

@@ -27,20 +27,35 @@
 #include "External/CachedDictionary.h"
 #include "External/NullDicAndStemmer.h"
 #include "External/InteractiveDicAndStemmer.h"
-
+#include "External/GizaBasedDic.h"
+#include "External/GlosbeDic.h"
+#include "External/GoogleTranslate.h"
+#include "External/WordnetStemmer.h"
+#include "External/Wordreference.h"
 /**********************************/
-
 
 static stuExternalComponent Dictionaries[] = {
     {"null", "NULL", NullDicAndStemmer::instance(), false},
     {"cd", "cached", CachedDictionary::instance(), true},
     {"in", "interactive", InteractiveDicAndStemmer::instance(), true},
+    {"gz", "giza", GizaBasedDic::instance(), true},
+    {"gl", "glosbe", GlosbeDic::instance(), true},
+    {"gg", "google", GoogleTranslate::instance(), true},
+    {"wr", "wordreference", WordreferenceDic::instance(), true},
     {"","",NULL,false}
 };
 
 static stuExternalComponent Stemmers[] = {
     {"null", "NULL", NullDicAndStemmer::instance(), false},
     {"in", "interactive", InteractiveDicAndStemmer::instance(), true},
+    {"wn", "wordnet", WordreferenceStemmer::instance(),
+     #ifdef USE_WN
+     true
+     #else
+     false
+     #endif
+    },
+    {"wr", "wordreference", WordreferenceStemmer::instance(), true},
     {"","",NULL,false}
 };
 
@@ -84,6 +99,12 @@ void Engine::initialize(intfExternalDictionary* _externDic,
     this->ExternalStemmer = _externStemmer ? _externStemmer : NullDicAndStemmer::instance();
     this->OutputDir = _output;
 
+    if (_sourceLang.isEmpty())
+        throw exEngine("Source language not specified");
+
+    if (_targetLang.isEmpty())
+        throw exEngine("Target language not specified");
+
     this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs);
     this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs);
 }
@@ -100,11 +121,11 @@ intfExternalStemmer* Engine::getStemmerInstance(const QString& _stemmer)
 
 QStringList Engine::validStemmers()
 {
-    return getComponentNames(Dictionaries);
+    return getComponentNames(Stemmers);
 }
 
 QStringList Engine::validDics()
 {
-    return getComponentNames(Stemmers);
+    return getComponentNames(Dictionaries);
 }
 

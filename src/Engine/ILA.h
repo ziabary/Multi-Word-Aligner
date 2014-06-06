@@ -20,6 +20,19 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#if QT_VERSION >= 0x050000
-    #include <QJsonParseError>
-#endif //QT_VERSION
+#ifndef ILA_H
+#define ILA_H
+#include <QString>
+
+class ILA
+{
+    static inline ILA& instance(){
+        return Instance ? *Instance : *(Instance = new ILA);
+    }
+
+private:
+    ILA();
+    static ILA* Instance;
+};
+
+#endif // ILA_H

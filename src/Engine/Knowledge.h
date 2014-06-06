@@ -20,32 +20,32 @@
  @author S.M.Mohammadzadeh <mehran.m@aut.ac.ir>
  */
 
-#ifndef UNITTEST_H
-#define UNITTEST_H
+#ifndef KNOWLEDGE_H
+#define KNOWLEDGE_H
 
-#include <QtTest/QtTest>
+#include <QHash>
+#include <QString>
+#include "libASM/clsASM.h"
 
-class ExternUnitTest : public QObject
+class Knowledge
 {
-    Q_OBJECT
+    static inline Knowledge& instance(){
+        return Instance ? *Instance : *(Instance = new Knowledge);
+    }
 
+    inline quint32 getTokenID(const QString& _token){
 
-private slots:
+    }
 
-    void initTestCase()
-    { }
+private:
+    Knowledge();
+    static Knowledge* Instance;
 
-    void CachedDic();
-    void GizaDic();
-    void GlosbeDic();
-    void GoogleDic();
-    void WordnetStem();
-    void WordReferenceDic();
-    void WordReferenceStem();
+    quint32 MaxWordID;
+    QHash<quint32, QString> ID2token;
+    QHash<QString,quint32> Token2ID;
 
-    void cleanupTestCase()
-    { }
-
+    clsASM* MultiWords;
 };
 
-#endif // UNITTEST_H
+#endif // KNOWLEDGE_H
