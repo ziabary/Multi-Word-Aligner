@@ -38,7 +38,7 @@ public:
         return QStringList();
     }
 
-    QString     getStem(const QString &_word){
+    QString     getStem(const QString &_word, bool _reverseDir){
         return _word;
     }
 

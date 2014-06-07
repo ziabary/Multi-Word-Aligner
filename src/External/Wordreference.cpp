@@ -51,7 +51,7 @@ QStringList WordreferenceDic::lookup(const QString &_word)
     return Result;
 }
 
-QString WordreferenceStemmer::getStem(const QString &_word)
+QString WordreferenceStemmer::getStem(const QString &_word, bool _reverseOrder)
 {
     wmaDebug<<"[WordReference] Looking Up: "<<wmaPrintable(_word)<<std::endl;
     QStringList Result;
@@ -64,7 +64,7 @@ QString WordreferenceStemmer::getStem(const QString &_word)
     }
 
     this->downloadURL(QString("http://api.wordreference.com/6582d/json/%1/%2").arg(
-                          Dir).arg(
+                          _reverseOrder ? this->ReverseDir : this->Dir).arg(
                           _word),
                       _word,
                       &Result);

@@ -32,7 +32,7 @@ class intfExternalStemmer : virtual public intfBaseExternalComponent
 public:
     intfExternalStemmer(){}
 
-    virtual QString getStem(const QString& _word) = 0;
+    virtual QString getStem(const QString& _word, bool _reverseDir) = 0;
 
     void init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
         intfBaseExternalComponent::init("stem",_baseDir, _sourceLang, _targetLang);

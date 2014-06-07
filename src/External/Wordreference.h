@@ -36,6 +36,7 @@ protected:
     void configure(const QString &_configArgs);
 
     QString Dir;
+    QString ReverseDir;
 };
 
 /**
@@ -64,7 +65,7 @@ public:
         return Instance ? Instance : (Instance = new WordreferenceStemmer);
     }
 
-    QString getStem(const QString &_word);
+    QString getStem(const QString &_word, bool _reverseOrder);
 
 private:
     WordreferenceStemmer(){}

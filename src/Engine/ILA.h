@@ -97,6 +97,7 @@ private:
 private:
     ILA();
     static ILA* Instance;
+    QList<stuReservation>   Reservations;
 };
 
 #endif // ILA_H

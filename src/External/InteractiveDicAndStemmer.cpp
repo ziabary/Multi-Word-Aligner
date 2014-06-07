@@ -40,7 +40,7 @@ QStringList InteractiveDicAndStemmer::lookup(const QString &_word)
     return QStringList()<<QString::fromUtf8(Translation.c_str());
 }
 
-QString InteractiveDicAndStemmer::getStem(const QString &_word)
+QString InteractiveDicAndStemmer::getStem(const QString &_word, bool _reverseDir)
 {
     std::string Stem;
     std::cout<<"Stem of "<<_word.toStdString()<<"? ";

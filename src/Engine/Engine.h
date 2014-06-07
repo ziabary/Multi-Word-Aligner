@@ -25,8 +25,9 @@
 
 #include <QString>
 #include "exMWABase.hpp"
-class intfExternalDictionary;
-class intfExternalStemmer;
+#include "intfExternalDictionary.hpp"
+#include "intfExternalStemmer.hpp"
+
 class Knowledge;
 class ILA;
 

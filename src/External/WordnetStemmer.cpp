@@ -33,8 +33,11 @@ WordnetStemmer* WordnetStemmer::Instance = NULL;
 WordnetStemmer::WordnetStemmer()
 {}
 
-QString WordnetStemmer::getStem(const QString &_word)
+QString WordnetStemmer::getStem(const QString &_word, bool _reverseDir)
 {
+    if (_reverseDir)
+        return _word; // Wordnet does not support reverse dir stemming
+
     QString Stem;
     char Word[_word.toUtf8().size()];
     if (re_wninit())

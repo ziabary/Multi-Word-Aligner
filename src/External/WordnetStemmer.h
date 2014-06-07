@@ -34,7 +34,7 @@ public:
         return Instance ? Instance : (Instance = new WordnetStemmer);
     }
 
-    QString     getStem(const QString &_word);
+    QString     getStem(const QString &_word, bool _reverseDir);
 
 private:
     void configure(const QString &_configArgs);

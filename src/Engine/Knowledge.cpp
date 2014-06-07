@@ -37,6 +37,8 @@ void Knowledge::init()
 
 quint32 Knowledge::getIDByToken(const QString &_token)
 {
+    if (_token.isEmpty())
+        return 0;
     quint32 ID = this->Token2ID.value(_token);
      if(!ID){
          this->MaxWordID++;
