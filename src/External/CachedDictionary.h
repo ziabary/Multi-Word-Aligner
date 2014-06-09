@@ -33,6 +33,7 @@ public:
     }
 
     QStringList lookup(const QString &_word);
+    void add(const QString& _flWord, const QStringList& _translations);
 
 private:
     CachedDictionary();

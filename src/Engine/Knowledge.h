@@ -26,7 +26,7 @@
 #include <QHash>
 #include <QString>
 #include "libASM/clsASM.h"
-#include "intfExternalDictionary.hpp"
+#include "External/CachedDictionary.h"
 
 class Knowledge
 {
@@ -47,7 +47,7 @@ public:
     void add2LM(const QString _phrase);
 
     QStringList lookupDic(const QString& _word);
-
+    void add2Dic(const QString _word, const QStringList _translations);
     void save(const QString& _baseDir);
     void load(const QString& _baseDir);
 
@@ -64,7 +64,7 @@ private:
 
     clsASM* SequenceDic;
     clsASM* LM;
-    intfExternalDictionary* WordDic;
+    CachedDictionary* WordDic;
 };
 
 #endif // KNOWLEDGE_H

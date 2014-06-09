@@ -19,11 +19,11 @@
  @author S.Mohammad M. Ziabary <mehran.m@aut.ac.ir>
  */
 
-
 #include "HLMT.h"
 #include "Engine.h"
 #include "Knowledge.h"
-#include <QList>
+
+HLMT* HLMT::Instance = NULL;
 
 HLMT::HLMT()
 {
@@ -371,7 +371,4 @@ QStringList HLMT::completeTranslationSequence(QStringList::Iterator &_flStart,
     return QStringList()<<CurrTrans.trimmed();
 }
 
-QStringList HLMT::translateWord(const QString &_word)
-{
-}
 

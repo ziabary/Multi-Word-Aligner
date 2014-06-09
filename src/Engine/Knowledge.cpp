@@ -23,7 +23,6 @@
 #include "Knowledge.h"
 #include <QStringList>
 #include "Common.h"
-#include "External/CachedDictionary.h"
 
 Knowledge* Knowledge::Instance = NULL;
 
@@ -94,6 +93,11 @@ void Knowledge::add2LM(const QString _phrase)
 QStringList Knowledge::lookupDic(const QString &_word)
 {
     return this->WordDic->lookup(_word);
+}
+
+void Knowledge::add2Dic(const QString _word, const QStringList _translations)
+{
+    this->WordDic->add(_word, _translations);
 }
 
 void Knowledge::save(const QString &_baseDir)

@@ -23,6 +23,7 @@
 #include "ILA.h"
 #include "Knowledge.h"
 #include "Engine.h"
+#include "HLMT.h"
 
 ILA* ILA::Instance = NULL;
 
@@ -41,8 +42,6 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
     FLPhrase.removeAll("");
     QStringList SLPhrase = _slPhrase.split(" ");
     SLPhrase.removeAll("");
-//    this->Translator.setTranslationDir(_dir);
-//    enuTranslationDir::Type ReverseDir = reverseDir(_dir);
 
     /****************************************************/
     //1- SET CurrFLWord = First Word Of FLPhrase
@@ -60,7 +59,8 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
     bool Skipped = false;
 
     /****************************************************/
-    /*QStringList DicSuggestions;
+    QStringList MySuggestions;
+    QStringList ExDicSuggestions;
     QStringList PredictedWords;
 
     QString     SLWordStem;
@@ -164,12 +164,12 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             }
 
             //10- MySuggestions = translateByKnowledge(CurrFLWord)
-            /*if (KnowledgeChecked == false)
+            if (KnowledgeChecked == false)
             {
-                MySuggestions = this->Translator.translate(*CurrFLWord, true).wholeSuggestedWords();
-
+                MySuggestions = Knowledge::instance().lookupDic(*CurrFLWord);
+                        //HLMT::instance().translate(*CurrFLWord, gConfigs.OnlineLearn).wholeSuggestedWords();
                 KnowledgeChecked = true;
-            }*/
+            }
 
             //11- If MySuggestions contains CurrSLWord
             //11.1- If Skipped
@@ -177,7 +177,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             //11.2- If SL2Reserve = CurrSLWord
             //11.2.1- Accepted = true
             //11.3- goto 100
-            /*if (MySuggestions.contains(*CurrSLWord))
+            if (MySuggestions.contains(*CurrSLWord))
             {
                 if (Skipped)
                     this->reserve(CurrFLWord, SL2Reserve, SL2Reserve.size() == 1);
@@ -208,7 +208,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             }
 
             //25 ..... TODO
-            /*const clsTranslatedPhrase& TranslatedPhrase = this->Translator.translate(*CurrFLWord, false);
+            const clsTranslatedPhrase& TranslatedPhrase = HLMT::instance().translate(*CurrFLWord,gConfigs.OnlineLearn);
             if (TranslatedPhrase.isMultiWord())
             {
                 CCSLWord = CurrSLWord;
@@ -254,16 +254,16 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
                 }
                 else if (TranslatedPhrase.wholeSuggestions().size() > 1)
                 {
-                    ETSError("Seems like a bug having multiple words for single word");
+                    wmaDebug<<"Seems like a bug having multiple words for single word"<<endl;
                     continue;
                 }
                 if (AllConsumed)
                     break; // goto 100
-            }*/
+            }
 
             //30- If isEmpty(ExDicSuggestions)
             //30.1- ExDicSuggestions = translateByExternalDic(CurrFLWord)
-/*            if (ExDicChecked == false)
+            if (ExDicChecked == false)
             {
                 ExDicSuggestions = Engine::instance().ExternalDic->lookup(*CurrFLWord);
                 ExDicChecked = true;
@@ -278,7 +278,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             //31.4- goto 100
             if (ExDicSuggestions.contains(*CurrSLWord))
             {
-                //this->add2Dictionary(_dir, *CurrFLWord, *CurrSLWord);
+                Knowledge::instance().add2Dic(*CurrFLWord, QStringList()<<*CurrSLWord);
                 if (Skipped)
                     this->reserve(CurrFLWord, SL2Reserve, SL2Reserve.size() == 1);
                 if(SL2Reserve.size() == 1)
@@ -295,7 +295,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             //32.4- goto 100
             if (ExDicSuggestions.contains(SLWordStem))
             {
-                //this->add2Dictionary(_dir, *CurrFLWord, *CurrSLWord);
+                Knowledge::instance().add2Dic(*CurrFLWord, QStringList()<<*CurrSLWord);
                 if (Skipped)
                     this->reserve(CurrFLWord, SL2Reserve, SL2Reserve.size() == 1);
                 if(SL2Reserve.size() == 1)
@@ -321,7 +321,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
                     if (i == SuggestionWords.size())
                     {
                         WordCombinationAccepted = true;
-                        this->add2SequenceDic(_dir, *CurrFLWord, Suggestion);
+                        this->add2SequenceDic(*CurrFLWord, Suggestion);
                         if (Skipped)
                             this->reserve(CurrFLWord, SL2Reserve, SL2Reserve.size() == 1);
                         if(SL2Reserve.size() == 1)
@@ -334,10 +334,8 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             if (WordCombinationAccepted)
                 break;//goto 100
 
-
-
             //45... TODO
-            if (CurrFLWord->toLower() == CurrSLWord->toLower() )// must also normalized
+            if (CurrFLWord->toLower() == CurrSLWord->toLower() )
             {
                 if (Skipped)
                     this->reserve(CurrFLWord, SL2Reserve, SL2Reserve.size() == 1);
@@ -407,7 +405,8 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
     }while(true);
 
     //150-add FLPhrase and SLPhrase to language model regions.
-    //Knowledge::instance().add2LanguageModels(_dir, _flPhrase, _slPhrase);
+    Knowledge::instance().add2LM(_slPhrase);
+    //Knowledge::instance().add2LM(_flPhrase);//Removed temporrily TODO use it for 2 way translation
 
     if (this->Reservations.size())
     {
@@ -537,7 +536,6 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
                 if (CurrIter > 0)
                 {
                     this->add2SequenceDic(
-                            _dir,
                             this->Reservations[CurrIter - 1].FirstLangWords + " " +
                         this->Reservations[CurrIter].FirstLangWords,
                         this->Reservations[CurrIter - 1].SecondLangWords);
@@ -557,19 +555,17 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             if (this->Reservations[CurrIter].IsSequence)
             {
                 if (this->Reservations[CurrIter].SecondLangWords.size())
-                    this->add2SequenceDic(_dir,
-                                          this->Reservations[CurrIter].FirstLangWords,
+                    this->add2SequenceDic(this->Reservations[CurrIter].FirstLangWords,
                                           this->Reservations[CurrIter].SecondLangWords);
                 else
                 {
-                    ETSError("Seems to be a bug");
+                    wmaDebug<<"Seems to be a bug"<<endl;
                 }
             }
             else
             {
                 if (this->Reservations[CurrIter].SecondLangWords.size() > 1)
-                    this->add2SequenceDic(_dir,
-                                          this->Reservations[CurrIter].FirstLangWords,
+                    this->add2SequenceDic(this->Reservations[CurrIter].FirstLangWords,
                                           this->Reservations[CurrIter].SecondLangWords);
             }
 
@@ -645,7 +641,7 @@ void ILA::add2SequenceDic(const QString &_firstLangWords, const QString &_transl
 
 bool ILA::areSameTranslations(const QString &_flWords, const QList<stuReservedTranslation> &_suggestedTranslation)
 {
-    /*const clsTranslatedPhrase& TranslatedPhrase = this->Translator.translate(_flWords, false);
+    const clsTranslatedPhrase& TranslatedPhrase = HLMT::instance().translate(_flWords, gConfigs.OnlineLearn);
 
     if (TranslatedPhrase.isEmpty() && TranslatedPhrase.hasReserved() == false)
         return false;
@@ -681,7 +677,7 @@ bool ILA::areSameTranslations(const QString &_flWords, const QList<stuReservedTr
         Reservation == _suggestedTranslation.end())
         return true;
     else
-        return false;*/
+        return false;
 }
 
 QStringList ILA::getPredictionByKnowledge(const QStringList &_phrasePart, bool _isFirstRequest)

@@ -45,8 +45,6 @@ private:
                                             QStringList::Iterator& _flEnd,
                                             const QString& _currTrans = "");
 
-    QStringList translateWord(const QString &_word);
-
 private:
     static HLMT* Instance;
     bool IsExpanded;

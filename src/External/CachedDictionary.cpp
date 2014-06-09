@@ -34,4 +34,10 @@ QStringList CachedDictionary::lookup(const QString &_word)
     return this->checkCache(_word);
 }
 
+void CachedDictionary::add(const QString &_flWord, const QStringList &_translations)
+{
+    for (auto Word : _translations)
+        this->add2Cache(_flWord, Word);
+}
+
 
