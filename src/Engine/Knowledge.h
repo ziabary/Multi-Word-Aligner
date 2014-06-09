@@ -26,6 +26,7 @@
 #include <QHash>
 #include <QString>
 #include "libASM/clsASM.h"
+#include "intfExternalDictionary.hpp"
 
 class Knowledge
 {
@@ -36,23 +37,34 @@ public:
 
     void init();
 
-    quint32 getIDByToken(const QString& _token);
+    quint32 getIDByToken(const QString& _token, bool _addIfNotExist = true);
     QString getTokenByID(quint32 _id);
 
-    QStringList predictNextTokens(const QString& _token);
+    QStringList predictNextTokenByDic(const QString& _token, bool _learn);
+    void add2SequenceDic(const QStringList &_flWords, const QStringList &_slWords);
+
+    QStringList predictNextTokenByLM(const QString& _token, bool _learn);
+    void add2LM(const QString _phrase);
+
+    QStringList lookupDic(const QString& _word);
 
     void save(const QString& _baseDir);
     void load(const QString& _baseDir);
 
 private:
     Knowledge();
+    QStringList predictNextByASM(clsASM* _asm, const QString _token, bool _learn);
+
+private:
     static Knowledge* Instance;
 
     quint32 MaxWordID;
     QHash<quint32, QString> ID2token;
     QHash<QString,quint32> Token2ID;
 
-    clsASM* ASM;
+    clsASM* SequenceDic;
+    clsASM* LM;
+    intfExternalDictionary* WordDic;
 };
 
 #endif // KNOWLEDGE_H

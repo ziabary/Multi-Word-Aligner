@@ -36,7 +36,9 @@ HEADERS += \
     src/exMWABase.hpp \
     src/External/Wordreference.h \
     src/Engine/Knowledge.h \
-    src/Engine/ILA.h
+    src/Engine/ILA.h \
+    src/Engine/HLMT.h \
+    src/Engine/clsTranslatedPhrase.h
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
     src/main.cpp \
@@ -50,7 +52,9 @@ SOURCES += \
     src/External/WordnetStemmer.cpp \
     src/External/Wordreference.cpp \
     src/Engine/Knowledge.cpp \
-    src/Engine/ILA.cpp
+    src/Engine/ILA.cpp \
+    src/Engine/HLMT.cpp \
+    src/Engine/clsTranslatedPhrase.cpp
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 INCLUDEPATH += src/
 

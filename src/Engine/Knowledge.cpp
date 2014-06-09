@@ -23,6 +23,7 @@
 #include "Knowledge.h"
 #include <QStringList>
 #include "Common.h"
+#include "External/CachedDictionary.h"
 
 Knowledge* Knowledge::Instance = NULL;
 
@@ -32,15 +33,17 @@ void Knowledge::init()
     this->getIDByToken(TOKEN_START); //Special Token used for start
     this->getIDByToken(TOKEN_END); //Special Token used for end
 
-    this->ASM = new clsASM(); //TODO Maybe its good to enable configuration
+    this->SequenceDic = new clsASM(); //TODO Maybe its good to enable configuration
+    this->LM = new clsASM();//TODO Maybe its good to enable configuration
+    this->WordDic = CachedDictionary::instance();
 }
 
-quint32 Knowledge::getIDByToken(const QString &_token)
+quint32 Knowledge::getIDByToken(const QString &_token, bool _addIfNotExist)
 {
     if (_token.isEmpty())
         return 0;
     quint32 ID = this->Token2ID.value(_token);
-     if(!ID){
+     if(!ID && _addIfNotExist){
          this->MaxWordID++;
          this->Token2ID.insert(_token, MaxWordID);
          this->ID2token.insert(MaxWordID, _token);
@@ -53,13 +56,44 @@ QString Knowledge::getTokenByID(quint32 _id)
     return this->ID2token.value(_id);
 }
 
-QStringList Knowledge::predictNextTokens(const QString &_token)
+QStringList Knowledge::predictNextTokenByDic(const QString &_token, bool _learn)
 {
-    QStringList PredictedTokens;
-    const std::unordered_set<ColID_t>& Prediction =
-            this->ASM->executeOnce(this->getIDByToken(_token));
-    for(ColID_t Predicted : Prediction)
-        PredictedTokens.append(this->getTokenByID(Predicted));
+    return this->predictNextByASM(this->SequenceDic, _token, _learn);
+}
+
+void Knowledge::add2SequenceDic(const QStringList &_flWords,
+                      const QStringList &_slWords)
+{
+    this->SequenceDic->executeOnce(NULL); // Start of a new sequence
+    this->SequenceDic->executeOnce(this->getIDByToken(TOKEN_START));
+    for (auto Token : _flWords)
+        this->SequenceDic->executeOnce(this->getIDByToken(Token));
+
+    this->SequenceDic->executeOnce(this->getIDByToken(QString(TOKEN_COUNT_PATTERN).arg(_flWords.size())));
+
+    for (auto Token : _slWords)
+        this->SequenceDic->executeOnce(this->getIDByToken(Token));
+    this->SequenceDic->executeOnce(this->getIDByToken(TOKEN_START));
+}
+
+QStringList Knowledge::predictNextTokenByLM(const QString &_token, bool _learn)
+{
+    return this->predictNextByASM(this->LM, _token, _learn);
+}
+
+void Knowledge::add2LM(const QString _phrase)
+{
+    QStringList Tokens = _phrase.split(" ");
+    Tokens.removeAll("");
+    this->SequenceDic->executeOnce(NULL); // Start of a new sequence
+    this->SequenceDic->executeOnce(this->getIDByToken(TOKEN_START));
+    for (auto Token : Tokens)
+        this->SequenceDic->executeOnce(this->getIDByToken(Token));
+}
+
+QStringList Knowledge::lookupDic(const QString &_word)
+{
+    return this->WordDic->lookup(_word);
 }
 
 void Knowledge::save(const QString &_baseDir)
@@ -74,4 +108,14 @@ void Knowledge::load(const QString &_baseDir)
 
 Knowledge::Knowledge()
 {}
+
+QStringList Knowledge::predictNextByASM(clsASM *_asm, const QString _token, bool _learn)
+{
+    QStringList PredictedTokens;
+    const std::unordered_set<ColID_t>& Prediction =
+            _asm->executeOnce(this->getIDByToken(_token),false);
+    for(ColID_t Predicted : Prediction)
+        PredictedTokens.append(this->getTokenByID(Predicted));
+    return PredictedTokens;
+}
 

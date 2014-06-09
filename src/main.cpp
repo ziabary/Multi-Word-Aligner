@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
             OutputDir = optarg;
             break;
         case 'v':
-            gWMAVerbose = true;
+            gConfigs.WMAVerbose = true;
             break;
         case 'h':
             usage();

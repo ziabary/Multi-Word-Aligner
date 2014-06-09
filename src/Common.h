@@ -27,16 +27,24 @@
 using namespace std;
 #include <QString>
 
-static bool gWMAVerbose = false;
+static struct stuConfigs{
+    bool OnlineLearn;
+    bool WMAVerbose;
+    stuConfigs(){
+        this->OnlineLearn = false;
+        this->WMAVerbose = false;
+    }
+}gConfigs;
 
-#define wmaDebug if(gWMAVerbose) std::cout
+#define wmaDebug if(gConfigs.WMAVerbose) std::cout
 static inline  const char* wmaPrintable(const QString& _str) {
-    (void)gWMAVerbose;  //suppress compiler warning
+    (void)gConfigs;  //suppress compiler warning
     return _str.toUtf8().constData();
 }
 
 #define TOKEN_START " S "
 #define TOKEN_END " E "
 #define TOKEN_COUNT_PATTERN " %1 "
+
 
 #endif // COMMON_H

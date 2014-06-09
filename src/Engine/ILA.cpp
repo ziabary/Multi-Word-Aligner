@@ -52,7 +52,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
     //5- SET Accepted = false
     //6- SET Skipped = false
 
-    /*auto CurrFLWord = FLPhrase.begin();
+    auto CurrFLWord = FLPhrase.begin();
     auto CurrSLWord = SLPhrase.begin();
     QList<QStringList::Iterator> SL2Reserve = QList<QStringList::Iterator>()<<CurrSLWord;
     auto StartingCheckPoint = CurrSLWord;
@@ -634,11 +634,12 @@ void ILA::add2SequenceDic(const QString &_firstLangWords, const QString &_transl
     }
     else
     {
+        QStringList SLWords = _translation.split(" ");
+        SLWords.removeAll("");
+        Knowledge::instance().add2SequenceDic(FLWords, SLWords);
 
-        //Knowledge::instance().add2SequenceDic( _firstLangWords, _translation);
-
-/*        std::cout<<"Added to sequence dic: "<<_firstLangWords.toUtf8().constData()<<" = "<<
-                _translation.toUtf8().constData()<<std::endl;*/
+        std::cout<<"Added to sequence dic: "<<wmaPrintable(_firstLangWords)<<" = "<<
+                wmaPrintable(_translation)<<std::endl;
     }
 }
 
@@ -686,10 +687,10 @@ bool ILA::areSameTranslations(const QString &_flWords, const QList<stuReservedTr
 QStringList ILA::getPredictionByKnowledge(const QStringList &_phrasePart, bool _isFirstRequest)
 {
     if (_isFirstRequest) {
-        Knowledge::instance().predictNextTokens("");
-        Knowledge::instance().predictNextTokens(TOKEN_START);
+        Knowledge::instance().predictNextTokenByDic("", gConfigs.OnlineLearn);
+        Knowledge::instance().predictNextTokenByDic(TOKEN_START, gConfigs.OnlineLearn);
     }
-    return Knowledge::instance().predictNextTokens(_phrasePart.last());
+    return Knowledge::instance().predictNextTokenByDic(_phrasePart.last(), gConfigs.OnlineLearn);
 }
 
 quint16 ILA::merge(quint16 _currIter, quint16 _nextIter, quint16 _firstIdenticalWordIdx)
