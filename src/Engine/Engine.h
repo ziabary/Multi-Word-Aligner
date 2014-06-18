@@ -39,11 +39,11 @@ public:
         return Instance ? *Instance : *(Instance = new Engine);
     }
 
-    void initialize(intfExternalDictionary* _externDic,
+    void initialize(QList<intfExternalDictionary *> _externDics,
                     intfExternalStemmer* _externStemmer,
                     const QString& _output,
                     const QString &_sourceLang,
-                    const QString &_targetLang, const QString &_externDicArgs, const QString &_externStemmerArgs);
+                    const QString &_targetLang, const QStringList &_externDicsArgs, const QString &_externStemmerArgs);
 
     void process(const QString& _sourceFile, const QString& _targetFile);
 
@@ -52,11 +52,13 @@ public:
     QStringList validStemmers();
     QStringList validDics();
 
+    QStringList lookupExternalDic(const QString& _token, bool _all = false);
+
 private:
     Engine();
     static Engine* Instance;
 
-    intfExternalDictionary* ExternalDic;
+    QList<intfExternalDictionary*> ExternalDics;
     intfExternalStemmer*    ExternalStemmer;
     QString                 OutputDir;
 

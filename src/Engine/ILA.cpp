@@ -269,7 +269,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             //30.1- ExDicSuggestions = translateByExternalDic(CurrFLWord)
             if (ExDicChecked == false)
             {
-                ExDicSuggestions = Engine::instance().ExternalDic->lookup(*CurrFLWord);
+                ExDicSuggestions = Engine::instance().lookupExternalDic(*CurrFLWord);
                 ExDicChecked = true;
             }
 
@@ -709,10 +709,16 @@ bool ILA::areSameTranslations(const QString &_flToken, const QList<stuReservedTr
 QStringList ILA::getPredictionByKnowledge(const QStringList &_phrasePart, bool _isFirstRequest)
 {
     if (_isFirstRequest) {
-        Knowledge::instance().predictNextTokenByDic("", WMAConfigs.OnlineLearn);
-        Knowledge::instance().predictNextTokenByDic(TOKEN_START, WMAConfigs.OnlineLearn);
+        Knowledge::instance().predictNextTokenByDic("",
+                                                    WMAConfigs.OnlineLearn ?
+                                                        clsASM::LearningFull : clsASM::AwardAndPunishment);
+        Knowledge::instance().predictNextTokenByDic(TOKEN_START,
+                                                    WMAConfigs.OnlineLearn ?
+                                                        clsASM::LearningFull : clsASM::AwardAndPunishment);
     }
-    return Knowledge::instance().predictNextTokenByDic(_phrasePart.last(), WMAConfigs.OnlineLearn);
+    return Knowledge::instance().predictNextTokenByDic(_phrasePart.last(),
+                                                       WMAConfigs.OnlineLearn ?
+                                                           clsASM::LearningFull : clsASM::AwardAndPunishment);
 }
 
 quint16 ILA::merge(quint16 _currIter, quint16 _nextIter, quint16 _firstIdenticalWordIdx)

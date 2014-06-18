@@ -90,9 +90,9 @@ QString Knowledge::getTokenByID(quint32 _id)
     return this->ID2token.value(_id);
 }
 
-QStringList Knowledge::predictNextTokenByDic(const QString &_token, bool _learn)
+QStringList Knowledge::predictNextTokenByDic(const QString &_token, clsASM::enuLearningLevel _learningLevel)
 {
-    return this->predictNextByASM(this->SequenceDic, _token, _learn);
+    return this->predictNextByASM(this->SequenceDic, _token, _learningLevel);
 }
 
 void Knowledge::add2SequenceDic(const QStringList &_flWords,
@@ -105,9 +105,9 @@ void Knowledge::add2SequenceDic(const QStringList &_flWords,
     this->SequenceDic->execute(&clsTokenGenerator(Tokens));
 }
 
-QStringList Knowledge::predictNextTokenByLM(const QString &_token, bool _learn)
+QStringList Knowledge::predictNextTokenByLM(const QString &_token, clsASM::enuLearningLevel _learninglevel)
 {
-    return this->predictNextByASM(this->LM, _token, _learn);
+    return this->predictNextByASM(this->LM, _token, _learninglevel);
 }
 
 void Knowledge::add2LM(const QString _phrase)
@@ -174,11 +174,11 @@ void Knowledge::load(const QString &_baseDir)
 Knowledge::Knowledge()
 {}
 
-QStringList Knowledge::predictNextByASM(clsASM *_asm, const QString _token, bool _learn)
+QStringList Knowledge::predictNextByASM(clsASM *_asm, const QString _token, clsASM::enuLearningLevel _learningLevel)
 {
     QStringList PredictedTokens;
     const std::unordered_set<ColID_t>& Prediction =
-            _asm->executeOnce(this->getIDByToken(_token),false);
+            _asm->executeOnce(this->getIDByToken(_token),_learningLevel);
     for(ColID_t Predicted : Prediction)
         PredictedTokens.append(this->getTokenByID(Predicted));
     return PredictedTokens;

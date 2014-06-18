@@ -90,15 +90,19 @@ Engine::Engine()
 {
 }
 
-void Engine::initialize(intfExternalDictionary* _externDic,
+void Engine::initialize(QList<intfExternalDictionary*> _externDics,
                         intfExternalStemmer* _externStemmer,
                         const QString& _output,
                         const QString& _sourceLang,
                         const QString& _targetLang,
-                        const QString& _externDicArgs,
+                        const QStringList& _externDicsArgs,
                         const QString& _externStemmerArgs)
 {
-    this->ExternalDic = _externDic ? _externDic : CachedDictionary::instance();
+    if (_externDics.isEmpty())
+        this->ExternalDics.append(CachedDictionary::instance());
+    else
+        this->ExternalDics = _externDics;
+
     this->ExternalStemmer = _externStemmer ? _externStemmer : NullDicAndStemmer::instance();
     this->OutputDir = _output;
 
@@ -108,7 +112,12 @@ void Engine::initialize(intfExternalDictionary* _externDic,
     if (_targetLang.isEmpty())
         throw exEngine("Target language not specified");
 
-    this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs);
+    int i=0;
+    foreach(intfExternalDictionary* Dic, this->ExternalDics){
+        Dic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicsArgs.isEmpty() ? "" : _externDicsArgs[i]);
+        i++;
+    }
+
     this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs);
 
     Knowledge::instance().init(OutputDir + "/", _sourceLang, _targetLang);
@@ -161,5 +170,16 @@ QStringList Engine::validStemmers()
 QStringList Engine::validDics()
 {
     return getComponentNames(Dictionaries);
+}
+
+QStringList Engine::lookupExternalDic(const QString &_token, bool _all)
+{
+    QStringList Result;
+    foreach (intfExternalDictionary* ExtDic, this->ExternalDics){
+        Result = ExtDic->lookup(_token);
+        if (!_all && Result.size())
+            break;
+    }
+    return Result;
 }
 

@@ -40,10 +40,10 @@ public:
     quint32 getIDByToken(const QString& _token, bool _addIfNotExist = true);
     QString getTokenByID(quint32 _id);
 
-    QStringList predictNextTokenByDic(const QString& _token, bool _learn);
+    QStringList predictNextTokenByDic(const QString& _token, clsASM::enuLearningLevel _learningLevel);
     void add2SequenceDic(const QStringList &_flWords, const QStringList &_slWords);
 
-    QStringList predictNextTokenByLM(const QString& _token, bool _learn);
+    QStringList predictNextTokenByLM(const QString& _token, clsASM::enuLearningLevel _learninglevel);
     void add2LM(const QString _phrase);
 
     QStringList lookupDic(const QString& _word);
@@ -53,7 +53,7 @@ public:
 
 private:
     Knowledge();
-    QStringList predictNextByASM(clsASM* _asm, const QString _token, bool _learn);
+    QStringList predictNextByASM(clsASM* _asm, const QString _token, clsASM::enuLearningLevel _learningLevel);
 
 private:
     static Knowledge* Instance;

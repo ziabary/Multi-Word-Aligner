@@ -25,6 +25,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QTextCodec>
+#include <QList>
 #include "Common.h"
 #include "exMWABase.hpp"
 #include "Engine/Engine.h"
@@ -61,15 +62,15 @@ int main(int argc, char* argv[])
     char optTag;
     QString SourceLanguge = DEFAULT_SOURCE_LANGUAE;
     QString TargetLanguage = DEFAULT_TARGET_LANGUAE;
-    QString ExternalDicArgs;
     QString ExternalStemmerArgs;
     QString OutputDir = "./";
-    intfExternalDictionary* ExternalDic = NULL;
+    QList<intfExternalDictionary*> ExternalDics;
+    QStringList  ExternalDicsArgs;
     intfExternalStemmer*    ExternalStemmer = NULL;
 
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF8"));
 
-    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:vh")) != -1) {
+    while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D::M:vh")) != -1) {
         switch (optTag) {
         default:
             std::cerr<<"Bad option "<<optTag<<optarg<<std::endl;
@@ -81,13 +82,15 @@ int main(int argc, char* argv[])
         case 't':
             TargetLanguage = optarg;
             break;
-        case 'd':
-            ExternalDic = Engine::instance().getDicInstance(optarg);
+        case 'd':{
+            intfExternalDictionary* ExternalDic = Engine::instance().getDicInstance(optarg);
             if (ExternalDic == NULL){
                 std::cerr<<"Invalid Dic: "<<optarg<<std::endl;
                 usage();
-            }
+            }else
+                ExternalDics.append(ExternalDic);
             break;
+        }
         case 'm':
             ExternalStemmer = Engine::instance().getStemmerInstance(optarg);
             if (ExternalStemmer == NULL){
@@ -95,7 +98,10 @@ int main(int argc, char* argv[])
                 usage();
             }
         case 'D':
-            ExternalDicArgs = optarg;
+            if (optarg)
+                ExternalDicsArgs.append(optarg);
+            else
+                ExternalDicsArgs.append("");
             break;
         case 'M':
             ExternalStemmerArgs = optarg;
@@ -111,6 +117,11 @@ int main(int argc, char* argv[])
             usage();
             break;
         }
+    }
+
+    if (ExternalDicsArgs.size() && ExternalDicsArgs.size() != ExternalDics.size()){
+        std::cerr<<"Count of dictionaries and dictionary arguments are not equal."<<std::endl;
+        return 1;
     }
 
     if (optind + 2 > argc){
@@ -138,12 +149,12 @@ int main(int argc, char* argv[])
     }
 
     try{
-        Engine::instance().initialize(ExternalDic,
+        Engine::instance().initialize(ExternalDics,
                                       ExternalStemmer,
                                       OutputDir,
                                       SourceLanguge,
                                       TargetLanguage,
-                                      ExternalDicArgs,
+                                      ExternalDicsArgs,
                                       ExternalStemmerArgs);
         Engine::instance().process(SourceLangFile, TargetLangFile);
     }catch(exMWABase& e){

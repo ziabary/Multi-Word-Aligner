@@ -58,8 +58,14 @@ const clsTranslatedPhrase &HLMT::translate(const QString &_phrase, bool _onlineL
         //check sequence dic
         QStringList::Iterator TranslationStartIter = FLTokens.end();
 
-        Knowledge::instance().predictNextTokenByDic("",this->OnlineLearn);//start new prediction sequence
-        Knowledge::instance().predictNextTokenByDic(TOKEN_START,this->OnlineLearn);//start sequence;
+        Knowledge::instance().predictNextTokenByDic("",
+                                                    this->OnlineLearn ?
+                                                        clsASM::LearningFull :
+                                                        clsASM::AwardAndPunishment);//start new prediction sequence
+        Knowledge::instance().predictNextTokenByDic(TOKEN_START,
+                                                    this->OnlineLearn ?
+                                                        clsASM::LearningFull :
+                                                        clsASM::AwardAndPunishment);//start sequence;
 
         /*
          * lookup following tokens and chekc wheter sequence translations are stored in dic or not
@@ -72,7 +78,10 @@ const clsTranslatedPhrase &HLMT::translate(const QString &_phrase, bool _onlineL
              CCTokenIter++)
         {
             SuggestedNextTokens =
-                    Knowledge::instance().predictNextTokenByDic(*CCTokenIter, this->OnlineLearn);
+                    Knowledge::instance().predictNextTokenByDic(*CCTokenIter,
+                                                                this->OnlineLearn ?
+                                                                    clsASM::LearningFull :
+                                                                    clsASM::AwardAndPunishment);
             if (SuggestedNextTokens.isEmpty())
                 break;
             bool SequenceFound = false;
@@ -304,8 +313,8 @@ bool HLMT::disambiguateByReordering(int _index, const QStringList *_newSuggestio
     {
         ETSError("Not implemented Yet");
     }
-
-    return false;*/
+*/
+    return false;
 }
 
 QStringList HLMT::completeTranslationSequence(QStringList::Iterator &_flStart,
@@ -314,25 +323,39 @@ QStringList HLMT::completeTranslationSequence(QStringList::Iterator &_flStart,
 {
     QStringList SuggestedNextTokens;
 
-    Knowledge::instance().predictNextTokenByDic("",this->OnlineLearn);
-    Knowledge::instance().predictNextTokenByDic(TOKEN_START,this->OnlineLearn);
+    Knowledge::instance().predictNextTokenByDic("",
+                                                this->OnlineLearn ?
+                                                    clsASM::LearningFull :
+                                                    clsASM::AwardAndPunishment);
+
+    Knowledge::instance().predictNextTokenByDic(TOKEN_START,
+                                                this->OnlineLearn ?
+                                                    clsASM::LearningFull :
+                                                    clsASM::AwardAndPunishment);
+
 
     for (QStringList::Iterator CCWordIter = _flStart; CCWordIter != _flEnd + 1; CCWordIter++)
         SuggestedNextTokens =
-                Knowledge::instance().predictNextTokenByDic(*CCWordIter, this->OnlineLearn);
-
-    //QString TranslationID = "#`" + QString::number(_flEnd - _flStart + 1) + "`#";
+                Knowledge::instance().predictNextTokenByDic(*CCWordIter,
+                                                            this->OnlineLearn ?
+                                                                clsASM::LearningFull :
+                                                                clsASM::AwardAndPunishment);
 
     SuggestedNextTokens =
             Knowledge::instance().predictNextTokenByDic(
                 QString(TOKEN_COUNT_PATTERN).arg((quint32)(_flEnd - _flStart + 1)),
-                this->OnlineLearn);
+                this->OnlineLearn ?
+                    clsASM::LearningFull :
+                    clsASM::AwardAndPunishment);
 
     QStringList CurrTransTokens = _currTrans.split(" ");CurrTransTokens.removeAll("");
 
     for(const QString& Token : CurrTransTokens)
         SuggestedNextTokens =
-                Knowledge::instance().predictNextTokenByDic(Token, this->OnlineLearn);
+                Knowledge::instance().predictNextTokenByDic(Token,                                                                 this->OnlineLearn ?
+                                                                clsASM::LearningFull :
+                                                                clsASM::AwardAndPunishment);
+
 
     QString CurrTrans = _currTrans;
     while(true)
@@ -348,7 +371,11 @@ QStringList HLMT::completeTranslationSequence(QStringList::Iterator &_flStart,
                 CurrTrans += " " + SuggestedNextTokens.first();
                 SuggestedNextTokens =
                         Knowledge::instance().predictNextTokenByDic(
-                            SuggestedNextTokens.first(), this->OnlineLearn);
+                            SuggestedNextTokens.first(),
+                            this->OnlineLearn ?
+                                clsASM::LearningFull :
+                                clsASM::AwardAndPunishment);
+
             }
         }
         else if (SuggestedNextTokens.size() > 1)
