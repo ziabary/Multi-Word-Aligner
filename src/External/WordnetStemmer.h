@@ -40,7 +40,7 @@ private:
     void configure(const QString &_configArgs);
 
 private:
-    WordnetStemmer();
+    WordnetStemmer():intfExternalStemmer("wn", "Wordnet"){}
     static WordnetStemmer* Instance;
 };
 

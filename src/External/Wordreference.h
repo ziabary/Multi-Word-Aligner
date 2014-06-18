@@ -52,7 +52,7 @@ public:
     QStringList lookup(const QString &_word);
 
 private:
-    WordreferenceDic(){}
+    WordreferenceDic():intfExternalDictionary("wr", "WordReference"){}
     static WordreferenceDic* Instance;
 };
 /**
@@ -68,7 +68,7 @@ public:
     QString getStem(const QString &_word, bool _reverseOrder);
 
 private:
-    WordreferenceStemmer(){}
+    WordreferenceStemmer():intfExternalStemmer("wr", "WordReference"){}
     static WordreferenceStemmer* Instance;
 };
 

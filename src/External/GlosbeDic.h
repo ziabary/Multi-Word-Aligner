@@ -41,7 +41,7 @@ private:
     void processData(const QByteArray& _buff, const QString& _word, void* _resultStorage);
 
 private:
-    GlosbeDic();
+    GlosbeDic():intfExternalDictionary("gl", "Glosbe"){}
     static GlosbeDic* Instance;
 
     const char* FirstLangID;

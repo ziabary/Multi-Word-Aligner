@@ -35,7 +35,7 @@ public:
         return Instance ? *Instance : *(Instance = new Knowledge);
     }
 
-    void init();
+    void init(const QString &_baseDir, const QString _sourceLang, const QString _targetLang);
 
     quint32 getIDByToken(const QString& _token, bool _addIfNotExist = true);
     QString getTokenByID(quint32 _id);
@@ -65,6 +65,12 @@ private:
     clsASM* SequenceDic;
     clsASM* LM;
     CachedDictionary* WordDic;
+
+    QString SeqDicFile;
+    QString LMFile;
+    QString WordIDFile;
+
+    quint32 LastIDInFile;
 };
 
 #endif // KNOWLEDGE_H

@@ -31,12 +31,13 @@ public:
     static inline CachedDictionary* instance(){
         return Instance ? Instance : (Instance = new CachedDictionary);
     }
+    void configure(const QString &_configArgs);
 
     QStringList lookup(const QString &_word);
     void add(const QString& _flWord, const QStringList& _translations);
 
 private:
-    CachedDictionary();
+    CachedDictionary():intfExternalDictionary("cs", "Cached"){}
     static CachedDictionary* Instance;
 };
 

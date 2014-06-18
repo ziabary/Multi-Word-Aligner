@@ -45,7 +45,7 @@ const clsTranslatedPhrase &HLMT::translate(const QString &_phrase, bool _onlineL
         CurrTokenIter++)
     {
         //If word is not registered keep it as is
-        if (Knowledge::instance().getIDByToken(*CurrTokenIter, false)){
+        if (Knowledge::instance().getIDByToken(*CurrTokenIter, false) == 0){
             if (TranslatedPhrase.hasReserved())
                 this->TranslatedPhrase.reserve(*CurrTokenIter);
             else

@@ -44,7 +44,6 @@ SOURCES += \
     src/main.cpp \
     src/Engine/Engine.cpp \
     src/External/CachedDictionary.cpp \
-    src/External/NullDicAndStemmer.cpp \
     src/External/InteractiveDicAndStemmer.cpp \
     src/External/GizaBasedDic.cpp \
     src/External/GlosbeDic.cpp \
@@ -78,7 +77,7 @@ DESTDIR = out/
 OBJECTS_DIR = out/build/obj
 MOC_DIR = out/build/moc
 
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=c++0x -fpermissive
 
 QT += core
 QT -= gui

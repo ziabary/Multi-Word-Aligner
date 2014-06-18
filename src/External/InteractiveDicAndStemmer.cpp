@@ -27,10 +27,6 @@
 
 InteractiveDicAndStemmer* InteractiveDicAndStemmer::Instance = NULL;
 
-InteractiveDicAndStemmer::InteractiveDicAndStemmer()
-{
-}
-
 QStringList InteractiveDicAndStemmer::lookup(const QString &_word)
 {
     std::string Translation;
@@ -42,6 +38,7 @@ QStringList InteractiveDicAndStemmer::lookup(const QString &_word)
 
 QString InteractiveDicAndStemmer::getStem(const QString &_word, bool _reverseDir)
 {
+    Q_UNUSED(_reverseDir)
     std::string Stem;
     std::cout<<"Stem of "<<_word.toStdString()<<"? ";
     std::cin>>Stem;

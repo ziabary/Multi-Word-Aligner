@@ -39,11 +39,12 @@ public:
     }
 
     QString     getStem(const QString &_word, bool _reverseDir){
+        Q_UNUSED(_reverseDir)
         return _word;
     }
 
 private:
-    NullDicAndStemmer();
+    NullDicAndStemmer():intfExternalDictionary("", "NULL"), intfExternalStemmer("", "NULL"){}
     static NullDicAndStemmer* Instance;
 };
 

@@ -42,7 +42,7 @@ private:
     void configure(const QString &_configArgs);
 
 private:
-    GoogleTranslate();
+    GoogleTranslate():intfExternalDictionary("gg", "Google"){}
     static GoogleTranslate* Instance;
 
     const char* FirstLangID;

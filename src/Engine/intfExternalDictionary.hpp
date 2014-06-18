@@ -30,11 +30,15 @@ MWA_ADD_EXCEPTION_HANDLER(exExternDic, exExternComponent)
 class intfExternalDictionary : virtual public intfBaseExternalComponent
 {
 public:
-    intfExternalDictionary(){}
+    intfExternalDictionary(const QString& _shortName,
+                           const QString& _fullName){
+        this->ShortName = _shortName;
+        this->FullName = _fullName;
+    }
 
     virtual QStringList lookup(const QString& _word) = 0;
 
-    void init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs){
+    void init(const QString& _baseDir, const QString& _sourceLang, const QString& _targetLang, const QString& _configArgs = ""){
          intfBaseExternalComponent::init("dic",_baseDir, _sourceLang, _targetLang);
          this->configure(_configArgs);
     }

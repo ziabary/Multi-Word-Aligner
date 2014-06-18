@@ -31,7 +31,6 @@ ILA::ILA()
 {
 }
 
-
 void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
 {
     this->Reservations.clear();
@@ -71,6 +70,11 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
     auto        CCSLWord   = CurrSLWord;
     bool        ExDicChecked = false;
     bool        KnowledgeChecked = false;
+
+    wmaDebug<<"******************************************************"<<endl;
+    wmaDebug<<wmaPrintable(_flPhrase)<<endl;
+    wmaDebug<<wmaPrintable(_slPhrase)<<endl;
+    wmaDebug<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
 
     do{
         do{
@@ -167,7 +171,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             if (KnowledgeChecked == false)
             {
                 MySuggestions = Knowledge::instance().lookupDic(*CurrFLWord);
-                        //HLMT::instance().translate(*CurrFLWord, gConfigs.OnlineLearn).wholeSuggestedWords();
+                        //HLMT::instance().translate(*CurrFLWord, WMAConfigs.OnlineLearn).wholeSuggestedWords();
                 KnowledgeChecked = true;
             }
 
@@ -208,7 +212,7 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             }
 
             //25 ..... TODO
-            const clsTranslatedPhrase& TranslatedPhrase = HLMT::instance().translate(*CurrFLWord,gConfigs.OnlineLearn);
+            const clsTranslatedPhrase& TranslatedPhrase = HLMT::instance().translate(*CurrFLWord,WMAConfigs.OnlineLearn);
             if (TranslatedPhrase.isMultiWord())
             {
                 CCSLWord = CurrSLWord;
@@ -410,6 +414,16 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
 
     if (this->Reservations.size())
     {
+#ifdef QT_DEBUG
+        wmaDebug<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
+        foreach(const stuReservation& Reserved, this->Reservations){
+            wmaDebug<<wmaPrintable(Reserved.FirstLangTokens);
+            wmaDebug<<" : \n\t";
+            foreach(const stuReservedTranslation& SLT, Reserved.SecondLangTokens)
+                wmaDebug<<wmaPrintable((*SLT.Iter))<<" ";
+            wmaDebug<<"\n";
+        }
+#endif
         bool HasAnyChanges;
         do
         {
@@ -428,12 +442,12 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
                     {
                         if (Curr==New)
                             continue;
-                        for(int AWIter = 0; AWIter < this->Reservations[Curr].SecondLangWords.size(); AWIter++)
-                            for(int WordIter=0; WordIter<this->Reservations[New].SecondLangWords.size(); WordIter++)
-                                if (this->Reservations[New].SecondLangWords[WordIter].Iter ==
-                                    this->Reservations[Curr].SecondLangWords[AWIter].Iter)
+                        for(int AWIter = 0; AWIter < this->Reservations[Curr].SecondLangTokens.size(); AWIter++)
+                            for(int WordIter=0; WordIter<this->Reservations[New].SecondLangTokens.size(); WordIter++)
+                                if (this->Reservations[New].SecondLangTokens[WordIter].Iter ==
+                                    this->Reservations[Curr].SecondLangTokens[AWIter].Iter)
                                 {
-                                    this->Reservations[New].SecondLangWords[WordIter].IsCleared = true;
+                                    this->Reservations[New].SecondLangTokens[WordIter].IsCleared = true;
                                     break;
                                 }
                     }
@@ -444,16 +458,17 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             //210.1.1- Remove whole consequtive marked words
             //210.1.2- HasAnyChanges = true
             //211- goto 210
-            for(int CurrIter=0; CurrIter< this->Reservations.size(); CurrIter++)
-                if (this->Reservations[CurrIter].SecondLangWords.size() &&
-                    this->Reservations[CurrIter].SecondLangWords[0].IsCleared)
-                    for(int WordIter=0; WordIter<this->Reservations[CurrIter].SecondLangWords.size(); WordIter++)
-                        if (this->Reservations[CurrIter].SecondLangWords[WordIter].IsCleared)
+            for(int CurrIter=0; CurrIter< this->Reservations.size(); CurrIter++){
+                if (this->Reservations[CurrIter].SecondLangTokens.size() &&
+                    this->Reservations[CurrIter].SecondLangTokens[0].IsCleared)
+                    for(int WordIter=0; WordIter<this->Reservations[CurrIter].SecondLangTokens.size(); WordIter++)
+                        if (this->Reservations[CurrIter].SecondLangTokens[WordIter].IsCleared)
                         {
-                            this->Reservations[CurrIter].SecondLangWords.removeAt(WordIter);
+                            this->Reservations[CurrIter].SecondLangTokens.removeAt(WordIter);
                             HasAnyChanges = true;
                             WordIter--;
                         }
+            }
             //212- If HasAnyChanges == true
             //212.1- goto 200
         }while(HasAnyChanges);
@@ -468,17 +483,17 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
         //221- goto 220
         for(int CurrIter=0; CurrIter< this->Reservations.size() - 1; CurrIter++)
         {
-            if (this->areSameTranslations(this->Reservations[CurrIter].FirstLangWords,
-                                      this->Reservations[CurrIter].SecondLangWords) == false)
+            if (this->areSameTranslations(this->Reservations[CurrIter].FirstLangTokens,
+                                      this->Reservations[CurrIter].SecondLangTokens) == false)
             {
                 int FirstIdenticalWordIndex = 0;
                 for(int NewIter=CurrIter + 1; NewIter< this->Reservations.size(); NewIter++)
                 {
-                    if (this->Reservations[CurrIter].SecondLangWords.size() > 0)
+                    if (this->Reservations[CurrIter].SecondLangTokens.size() > 0)
                     {
-                        if (this->Reservations[NewIter].SecondLangWords.isEmpty() ||
-                            this->Reservations[CurrIter].SecondLangWords[FirstIdenticalWordIndex].Iter >=
-                            this->Reservations[NewIter].SecondLangWords[0].Iter)
+                        if (this->Reservations[NewIter].SecondLangTokens.isEmpty() ||
+                            this->Reservations[CurrIter].SecondLangTokens[FirstIdenticalWordIndex].Iter >=
+                            this->Reservations[NewIter].SecondLangTokens[0].Iter)
                         {
                             FirstIdenticalWordIndex = this->merge(CurrIter, NewIter, FirstIdenticalWordIndex);
                             NewIter--;
@@ -487,18 +502,18 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
                         {
                             if (this->Reservations[NewIter].AcceptedSequence &&
                                     this->Reservations[CurrIter].AcceptedSequence &&
-                                    this->Reservations[CurrIter].SecondLangWords.first().Iter ==
-                                    this->Reservations[NewIter].SecondLangWords.first().Iter)
+                                    this->Reservations[CurrIter].SecondLangTokens.first().Iter ==
+                                    this->Reservations[NewIter].SecondLangTokens.first().Iter)
                                 continue;
                             bool SameStart = true;
                             for(int WordIter= 0;
-                                WordIter < qMin(this->Reservations[NewIter].SecondLangWords.size(),
-                                                this->Reservations[CurrIter].SecondLangWords.size() -
+                                WordIter < qMin(this->Reservations[NewIter].SecondLangTokens.size(),
+                                                this->Reservations[CurrIter].SecondLangTokens.size() -
                                                 FirstIdenticalWordIndex);
                                 WordIter++)
                             {
-                                if(this->Reservations[CurrIter].SecondLangWords[WordIter + FirstIdenticalWordIndex].Iter !=
-                                   this->Reservations[NewIter].SecondLangWords[WordIter].Iter)
+                                if(this->Reservations[CurrIter].SecondLangTokens[WordIter + FirstIdenticalWordIndex].Iter !=
+                                   this->Reservations[NewIter].SecondLangTokens[WordIter].Iter)
                                 {
                                     SameStart = false;
                                     break;
@@ -527,24 +542,35 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
         //230.1.3.1- merge current reservation with next. mark it as sequence
         //231- goto 230
         for(int CurrIter=0; CurrIter< this->Reservations.size(); CurrIter++){
-            if (this->Reservations[CurrIter].SecondLangWords.isEmpty()){
+            if (this->Reservations[CurrIter].SecondLangTokens.isEmpty()){
                 for(int NewIter=CurrIter + 1; NewIter< this->Reservations.size(); NewIter++)
-                    if (this->Reservations[NewIter].SecondLangWords.isEmpty())
+                    if (this->Reservations[NewIter].SecondLangTokens.isEmpty())
                         this->merge(CurrIter, NewIter,0);
                     else
                         break;
                 if (CurrIter > 0)
                 {
                     this->add2SequenceDic(
-                            this->Reservations[CurrIter - 1].FirstLangWords + " " +
-                        this->Reservations[CurrIter].FirstLangWords,
-                        this->Reservations[CurrIter - 1].SecondLangWords);
+                            this->Reservations[CurrIter - 1].FirstLangTokens + " " +
+                        this->Reservations[CurrIter].FirstLangTokens,
+                        this->Reservations[CurrIter - 1].SecondLangTokens);
                 }
 
                 if (CurrIter + 1 < this->Reservations.size())
                     this->merge(CurrIter, CurrIter + 1, 0);
             }
         }
+
+
+#ifdef QT_DEBUG
+        wmaDebug<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
+        foreach(const stuReservation& Reserved, this->Reservations){
+            wmaDebug<<wmaPrintable(Reserved.FirstLangTokens)<<" : \n\t";
+            foreach(const stuReservedTranslation& SLT, Reserved.SecondLangTokens)
+                wmaDebug<<wmaPrintable((*SLT.Iter))<<" ";
+            wmaDebug<<"\n";
+        }
+#endif
 
         //240- for each reservation
         //240.1- if ReservedTranslation is marked as sequence
@@ -554,9 +580,9 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
         {
             if (this->Reservations[CurrIter].IsSequence)
             {
-                if (this->Reservations[CurrIter].SecondLangWords.size())
-                    this->add2SequenceDic(this->Reservations[CurrIter].FirstLangWords,
-                                          this->Reservations[CurrIter].SecondLangWords);
+                if (this->Reservations[CurrIter].SecondLangTokens.size())
+                    this->add2SequenceDic(this->Reservations[CurrIter].FirstLangTokens,
+                                          this->Reservations[CurrIter].SecondLangTokens);
                 else
                 {
                     wmaDebug<<"Seems to be a bug"<<endl;
@@ -564,67 +590,67 @@ void ILA::process(const QString &_flPhrase, const QString &_slPhrase)
             }
             else
             {
-                if (this->Reservations[CurrIter].SecondLangWords.size() > 1)
-                    this->add2SequenceDic(this->Reservations[CurrIter].FirstLangWords,
-                                          this->Reservations[CurrIter].SecondLangWords);
+                if (this->Reservations[CurrIter].SecondLangTokens.size() > 1)
+                    this->add2SequenceDic(this->Reservations[CurrIter].FirstLangTokens,
+                                          this->Reservations[CurrIter].SecondLangTokens);
             }
 
         }
     }/**/
 }
 
-void ILA::reserve(QStringList::Iterator &_firstLangWord,
-                  const QList<QStringList::Iterator> &_secondLangWords,
+void ILA::reserve(QStringList::Iterator &_firstLangToken,
+                  const QList<QStringList::Iterator> &_secondLangTokens,
                   bool _isAccepted)
 {
-    wmaDebug<<"Reserved:["<<(_isAccepted ? "acc" : "res")<<"] "<<_firstLangWord->toUtf8().data()<<" --> ";
+    wmaDebug<<"Reserved:["<<(_isAccepted ? "acc" : "res")<<"] "<<_firstLangToken->toUtf8().data()<<" --> ";
     QList<stuReservedTranslation> SecondLangReserved;
-    for(QStringList::Iterator WordIter : _secondLangWords)
+    for(QStringList::Iterator WordIter : _secondLangTokens)
+    {
+        SecondLangReserved.append(stuReservedTranslation(WordIter));
+        wmaDebug<<WordIter->toUtf8().constData()<<" ";
+    }
+    wmaDebug<<std::endl;
+
+    this->Reservations.append(stuReservation(_firstLangToken, SecondLangReserved, _isAccepted));
+}
+
+void ILA::reserve(QStringList::Iterator &_flwStart, QStringList::Iterator &_flwEnd, const QList<QStringList::Iterator> &_secondLangTokens, bool _isAccepted)
+{
+    QString FLWords;
+    for (auto WordIter = _flwStart; WordIter<= _flwEnd; WordIter++)
+        FLWords += *WordIter + " ";
+
+    wmaDebug<<"Reserved:[seq] "<<wmaPrintable(FLWords)<<" --> ";
+    QList<stuReservedTranslation> SecondLangReserved;
+
+    for(QStringList::Iterator WordIter : _secondLangTokens)
     {
         SecondLangReserved.append(stuReservedTranslation(WordIter));
         wmaDebug<<WordIter->toUtf8().data()<<" ";
     }
     wmaDebug<<std::endl;
 
-    this->Reservations.append(stuReservation(_firstLangWord, SecondLangReserved, _isAccepted));
-}
-
-void ILA::reserve(QStringList::Iterator &_flwStart, QStringList::Iterator &_flwEnd, const QList<QStringList::Iterator> &_secondLangWords, bool _isAccepted)
-{
-    QString FLWords;
-    for (auto WordIter = _flwStart; WordIter<= _flwEnd; WordIter++)
-        FLWords += *WordIter + " ";
-
-    std::cout<<"Reserved:[seq] "<<FLWords.toUtf8().constData()<<" --> ";
-    QList<stuReservedTranslation> SecondLangReserved;
-
-    for(QStringList::Iterator WordIter : _secondLangWords)
-    {
-        SecondLangReserved.append(stuReservedTranslation(WordIter));
-        std::cout<<WordIter->toUtf8().data()<<" ";
-    }
-    std::cout<<std::endl;
-
     this->Reservations.append(stuReservation(_flwStart, SecondLangReserved, _isAccepted, FLWords));
 }
 
-void ILA::add2SequenceDic(const QString &_firstLangWords, const QList<stuReservedTranslation> &_secondLangWords)
+void ILA::add2SequenceDic(const QString &_firstLangTokens, const QList<stuReservedTranslation> &_secondLangTokens)
 {
     QString Translation;
-    for(const stuReservedTranslation& RTIter: _secondLangWords)
+    for(const stuReservedTranslation& RTIter: _secondLangTokens)
         Translation += *RTIter.Iter + " ";
 
-    this->add2SequenceDic(_firstLangWords, Translation);
+    this->add2SequenceDic(_firstLangTokens, Translation);
 }
 
-void ILA::add2SequenceDic(const QString &_firstLangWords, const QString &_translation)
+void ILA::add2SequenceDic(const QString &_firstLangTokens, const QString &_translation)
 {
-    QStringList FLWords = _firstLangWords.split(" ");
+    QStringList FLWords = _firstLangTokens.split(" ");
     FLWords.removeAll("");
     if (FLWords.size() > 5)
     {
-        std::cout<<"Phrase is to large to be added to sequence dic: "<<
-                   _firstLangWords.toUtf8().constData()<<
+        wmaDebug<<"Phrase is to large to be added to sequence dic: "<<
+                   _firstLangTokens.toUtf8().constData()<<
                    " #`"<<FLWords.size()<<"`# "<<
                    _translation.toUtf8().constData()<<std::endl;
     }
@@ -634,14 +660,14 @@ void ILA::add2SequenceDic(const QString &_firstLangWords, const QString &_transl
         SLWords.removeAll("");
         Knowledge::instance().add2SequenceDic(FLWords, SLWords);
 
-        std::cout<<"Added to sequence dic: "<<wmaPrintable(_firstLangWords)<<" = "<<
+        wmaDebug<<"Added to sequence dic: "<<wmaPrintable(_firstLangTokens)<<" = "<<
                 wmaPrintable(_translation)<<std::endl;
     }
 }
 
-bool ILA::areSameTranslations(const QString &_flWords, const QList<stuReservedTranslation> &_suggestedTranslation)
+bool ILA::areSameTranslations(const QString &_flToken, const QList<stuReservedTranslation> &_suggestedTranslation)
 {
-    const clsTranslatedPhrase& TranslatedPhrase = HLMT::instance().translate(_flWords, gConfigs.OnlineLearn);
+    const clsTranslatedPhrase& TranslatedPhrase = HLMT::instance().translate(_flToken, WMAConfigs.OnlineLearn);
 
     if (TranslatedPhrase.isEmpty() && TranslatedPhrase.hasReserved() == false)
         return false;
@@ -683,40 +709,40 @@ bool ILA::areSameTranslations(const QString &_flWords, const QList<stuReservedTr
 QStringList ILA::getPredictionByKnowledge(const QStringList &_phrasePart, bool _isFirstRequest)
 {
     if (_isFirstRequest) {
-        Knowledge::instance().predictNextTokenByDic("", gConfigs.OnlineLearn);
-        Knowledge::instance().predictNextTokenByDic(TOKEN_START, gConfigs.OnlineLearn);
+        Knowledge::instance().predictNextTokenByDic("", WMAConfigs.OnlineLearn);
+        Knowledge::instance().predictNextTokenByDic(TOKEN_START, WMAConfigs.OnlineLearn);
     }
-    return Knowledge::instance().predictNextTokenByDic(_phrasePart.last(), gConfigs.OnlineLearn);
+    return Knowledge::instance().predictNextTokenByDic(_phrasePart.last(), WMAConfigs.OnlineLearn);
 }
 
 quint16 ILA::merge(quint16 _currIter, quint16 _nextIter, quint16 _firstIdenticalWordIdx)
 {
-    this->Reservations[_currIter].FirstLangWords =
-        this->Reservations[_currIter].FirstLangWords + " " +
-       this->Reservations[_nextIter].FirstLangWords;
+    this->Reservations[_currIter].FirstLangTokens =
+        this->Reservations[_currIter].FirstLangTokens + " " +
+       this->Reservations[_nextIter].FirstLangTokens;
 
     int FirstIdenticalWordIndex=0;
-    if (this->Reservations[_currIter].SecondLangWords.size() &&
-        this->Reservations[_nextIter].SecondLangWords.size() &&
-        this->Reservations[_currIter].SecondLangWords[_firstIdenticalWordIdx].Iter >
-        this->Reservations[_nextIter].SecondLangWords[0].Iter )
+    if (this->Reservations[_currIter].SecondLangTokens.size() &&
+        this->Reservations[_nextIter].SecondLangTokens.size() &&
+        this->Reservations[_currIter].SecondLangTokens[_firstIdenticalWordIdx].Iter >
+        this->Reservations[_nextIter].SecondLangTokens[0].Iter )
     {
-        while (this->Reservations[_nextIter].SecondLangWords.size() > FirstIdenticalWordIndex &&
-               this->Reservations[_nextIter].SecondLangWords[FirstIdenticalWordIndex].Iter !=
-               this->Reservations[_currIter].SecondLangWords[0].Iter)
+        while (this->Reservations[_nextIter].SecondLangTokens.size() > FirstIdenticalWordIndex &&
+               this->Reservations[_nextIter].SecondLangTokens[FirstIdenticalWordIndex].Iter !=
+               this->Reservations[_currIter].SecondLangTokens[0].Iter)
         {
-            this->Reservations[_currIter].SecondLangWords.insert(
+            this->Reservations[_currIter].SecondLangTokens.insert(
                     FirstIdenticalWordIndex + _firstIdenticalWordIdx,
-                    this->Reservations[_nextIter].SecondLangWords[FirstIdenticalWordIndex]);
+                    this->Reservations[_nextIter].SecondLangTokens[FirstIdenticalWordIndex]);
             FirstIdenticalWordIndex++;
         }
     }
-    else if (this->Reservations[_currIter].SecondLangWords.size() <
-        this->Reservations[_nextIter].SecondLangWords.size())
+    else if (this->Reservations[_currIter].SecondLangTokens.size() <
+        this->Reservations[_nextIter].SecondLangTokens.size())
     {
-        this->Reservations[_currIter].SecondLangWords.append(
-                    this->Reservations[_nextIter].SecondLangWords.mid(
-                        this->Reservations[_currIter].SecondLangWords.size() - _firstIdenticalWordIdx));
+        this->Reservations[_currIter].SecondLangTokens.append(
+                    this->Reservations[_nextIter].SecondLangTokens.mid(
+                        this->Reservations[_currIter].SecondLangTokens.size() - _firstIdenticalWordIdx));
     }
 
     this->Reservations[_currIter].IsSequence = true;

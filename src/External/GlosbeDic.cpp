@@ -31,10 +31,6 @@
 
 GlosbeDic* GlosbeDic::Instance = NULL;
 
-GlosbeDic::GlosbeDic() :
-    intfExternalDictionary()
-{}
-
 QStringList GlosbeDic::lookup(const QString &_word)
 {
     wmaDebug<<"[Glosbe] Looking Up: "<<wmaPrintable(_word)<<std::endl;
@@ -92,9 +88,10 @@ void GlosbeDic::processData(const QByteArray& _buff, const QString& _word, void*
                         if(ObjectIter.key().toLower().startsWith("phrase")) {
                             if (ObjectIter.value().toObject().value("language").toString() == this->SecondLangID)
                             {
-                                QString Translation = ObjectIter.value().toObject().value("text").toString();
-                                Storage->append(Translation.trimmed());
-                                this->add2Cache(_word, Translation);
+                                QString Translation =
+                                        ObjectIter.value().toObject().value("text").toString().trimmed().toLower();
+                                Storage->append(Translation);
+                                this->add2Cache(_word.trimmed().toLower(), Translation);
                             }
                         }else if(ObjectIter.key().toLower() == "authors") {
                         }else if(ObjectIter.key().toLower() == "meaningid") {

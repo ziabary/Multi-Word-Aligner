@@ -50,7 +50,7 @@ private:
     void configure(const QString &_configArgs);
 
 private:
-    GizaBasedDic();
+    GizaBasedDic():intfExternalDictionary("gz", "Giza"){}
     static GizaBasedDic* Instance;
 
     QHash<QString, stuTranslation> Dictionary;

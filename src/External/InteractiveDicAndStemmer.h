@@ -39,7 +39,7 @@ public:
 private:
 
 private:
-    InteractiveDicAndStemmer();
+    InteractiveDicAndStemmer():intfExternalDictionary("in", "Interactive"), intfExternalStemmer("in", "Interactive"){}
     static InteractiveDicAndStemmer* Instance;
 };
 

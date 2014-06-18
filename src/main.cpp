@@ -24,6 +24,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QTextCodec>
 #include "Common.h"
 #include "exMWABase.hpp"
 #include "Engine/Engine.h"
@@ -34,6 +35,9 @@
 #define DEFAULT_SOURCE_LANGUAE "en"
 #define DEFAULT_TARGET_LANGUAE "es"
 
+stuConfigs WMAConfigs;
+
+#include <QDebug>
 static void
 usage(void)
 {
@@ -62,6 +66,8 @@ int main(int argc, char* argv[])
     QString OutputDir = "./";
     intfExternalDictionary* ExternalDic = NULL;
     intfExternalStemmer*    ExternalStemmer = NULL;
+
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF8"));
 
     while ( (optTag = getopt(argc, argv, "d:m:s:t:o:D:M:vh")) != -1) {
         switch (optTag) {
@@ -98,7 +104,8 @@ int main(int argc, char* argv[])
             OutputDir = optarg;
             break;
         case 'v':
-            gConfigs.WMAVerbose = true;
+            WMAConfigs.WMAVerbose = true;
+            wmaDebug<<"Switched to verbose"<<endl;
             break;
         case 'h':
             usage();
@@ -138,6 +145,7 @@ int main(int argc, char* argv[])
                                       TargetLanguage,
                                       ExternalDicArgs,
                                       ExternalStemmerArgs);
+        Engine::instance().process(SourceLangFile, TargetLangFile);
     }catch(exMWABase& e){
         std::cerr<<e.what().toStdString().c_str()<<std::endl;
     }

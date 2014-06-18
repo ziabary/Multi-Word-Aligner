@@ -25,9 +25,9 @@
 
 #include <QString>
 #include <Common.h>
-#include <stdexcept>
+#include <qtconcurrentexception.h>
 
-class exMWABase: public std::exception
+class exMWABase: public QtConcurrent::Exception
 {
   public:
     /**
@@ -38,6 +38,16 @@ class exMWABase: public std::exception
      **/
     exMWABase(const QString& _message = "", quint32 _line = 0) throw (){
         this->Message = _line ? QString::number(_line) + ": " + _message : _message;
+    }
+
+    void raise() const
+    {
+      throw *this;
+    }
+
+    QtConcurrent::Exception* clone()
+    {
+      return new exMWABase(*this);
     }
 
     /**

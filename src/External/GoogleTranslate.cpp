@@ -33,22 +33,18 @@ using namespace std;
 
 GoogleTranslate* GoogleTranslate::Instance = NULL;
 
-GoogleTranslate::GoogleTranslate() :
-    intfExternalDictionary()
-{}
-
 QStringList GoogleTranslate::lookup(const QString &_word)
 {
-    wmaDebug<<"[Google] Looking Up: "<<wmaPrintable(_word)<<std::endl;
+    wmaDebug<<"[Google] Looking Up: "<<wmaPrintable(_word.trimmed().toLower())<<std::endl;
     QStringList Result;
-    Result = this->checkCache(_word);
+    Result = this->checkCache(_word.trimmed().toLower());
     if (Result.size())
     {
         wmaDebug<<"\t found in cache. "<<std::endl;
         return Result;
     }
 
-    this->downloadURL(QString("http://translate.google.com/translate_a/t?client=t&hl=es&sl="
+    this->downloadURL(QString::fromUtf8("http://translate.google.com/translate_a/t?client=t&hl=es&sl="
                               "&ie=UTF-8&oe=UTF-8&multires=1&oc=2&otf=2&ssel=0&tsel=0&sc=1"
                               "&sl=%1&tl=%2&q=%3").arg(
                           this->FirstLangID).arg(
@@ -62,8 +58,10 @@ QStringList GoogleTranslate::lookup(const QString &_word)
 
 void GoogleTranslate::add2Dic(const QString& _word, const QString &_translation, QStringList* _storage)
 {
-    _storage->append(_translation.trimmed());
-    std::cout<<"\tGoogle: "<<wmaPrintable(_translation)<<std::endl;
+    if (_storage->contains(_translation))
+       return;
+    _storage->append(_translation);
+    wmaDebug<<"\tGoogle: "<<wmaPrintable(_translation)<<std::endl;
     this->add2Cache(_word, _translation);
 }
 
@@ -81,9 +79,10 @@ void GoogleTranslate::processData(const QByteArray& _buff, const QString& _word,
     QStringList* Storage = (QStringList*)_resultStorage;
     QByteArray DownloadedJson = _buff;
 
-    DownloadedJson.replace(",,",",\"\",");
-    DownloadedJson.replace(",,",",\"\",");
-    DownloadedJson.replace(",,",",\"\",");
+    while(DownloadedJson.contains(",,"))
+        DownloadedJson.replace(",,",",\"\",");
+    DownloadedJson.replace(",]",",\"\"]");
+    DownloadedJson.replace("[,","[\"\",");
     QJsonDocument JSonDoc = QJsonDocument::fromJson(DownloadedJson, &Error);
 
     if (Error.error != QJsonParseError::NoError)
@@ -95,8 +94,8 @@ void GoogleTranslate::processData(const QByteArray& _buff, const QString& _word,
         {
             if (JsonArray.at(0).toArray().size() &&
                 JsonArray.at(0).toArray().at(0).toArray().size())
-                this->add2Dic(_word,
-                              JsonArray.at(0).toArray().at(0).toArray().at(0).toString(),
+                this->add2Dic(_word.trimmed().toLower(),
+                              JsonArray.at(0).toArray().at(0).toArray().at(0).toString().trimmed().toLower(),
                               Storage);
         }
         if (JsonArray.size() > 1 && JsonArray.at(1).isArray())
@@ -108,8 +107,8 @@ void GoogleTranslate::processData(const QByteArray& _buff, const QString& _word,
                 {
                     JsonArray = JsonArray.at(1).toArray();
                     for (QJsonValue ArrayInnerIterValue : JsonArray)
-                        this->add2Dic(_word,
-                                      ArrayInnerIterValue.toString(),
+                        this->add2Dic(_word.trimmed().toLower(),
+                                      ArrayInnerIterValue.toString().trimmed().toLower(),
                                       Storage);
                 }
                 else

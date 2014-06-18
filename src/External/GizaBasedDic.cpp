@@ -27,10 +27,6 @@
 
 GizaBasedDic* GizaBasedDic::Instance = NULL;
 
-GizaBasedDic::GizaBasedDic()
-{
-}
-
 QStringList GizaBasedDic::lookup(const QString &_word)
 {
     QStringList Out;

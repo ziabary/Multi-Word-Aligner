@@ -21,11 +21,14 @@
  */
 
 #include "CachedDictionary.h"
+#include "NullDicAndStemmer.h"
 
 CachedDictionary* CachedDictionary::Instance = NULL;
+NullDicAndStemmer* NullDicAndStemmer::Instance = NULL;
 
-CachedDictionary::CachedDictionary()
+void CachedDictionary::configure(const QString &_configArgs)
 {
+    Q_UNUSED(_configArgs)
     this->loadCache();
 }
 

@@ -29,10 +29,6 @@
 
 WordnetStemmer* WordnetStemmer::Instance = NULL;
 
-
-WordnetStemmer::WordnetStemmer()
-{}
-
 QString WordnetStemmer::getStem(const QString &_word, bool _reverseDir)
 {
     if (_reverseDir)

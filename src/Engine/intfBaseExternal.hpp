@@ -39,6 +39,9 @@ class intfBaseExternalComponent
 public:
     intfBaseExternalComponent(){}
 
+    inline const QString& shortName(){return this->ShortName;}
+    inline const QString& fullName(){return this->FullName;}
+
 protected: //Virtuals
     virtual void processData(const QByteArray& _buff, const QString& _word, void* _resultStorage){
         Q_UNUSED(_buff);
@@ -57,7 +60,7 @@ protected:
         this->SourceLang = _sourceLang.toLower();
         this->TargetLang = _targetLang.toLower();
         this->BaseDir = _baseDir;
-        this->CacheExtension = ".c" + _type;
+        this->CacheExtension = "." + this->ShortName + ".c" + _type;
         if (!ISO639isValid(this->SourceLang.toAscii().constData()) ||
             !ISO639isValid(this->TargetLang.toAscii().constData()))
             throw exExternComponent("Invalid Source or Target language");
@@ -65,7 +68,7 @@ protected:
 
     void loadCache()
     {
-        QFile File(this->BaseDir +this->SourceLang+"2"+this->TargetLang+ CacheExtension);
+        QFile File(this->BaseDir +this->SourceLang+"2"+this->TargetLang+ this->CacheExtension);
         if (File.open(QFile::ReadOnly))
         {
             QTextStream Dictionary(&File);
@@ -83,14 +86,17 @@ protected:
 
     void add2Cache(const QString& _flWord, const QString& _translation)
     {
-        QFile File(this->BaseDir +this->SourceLang+"2"+this->TargetLang+"."+this->CacheExtension);
+        if (OldEntries.values(_flWord).contains(_translation))
+            return;
+
+        this->OldEntries.insertMulti(_flWord, _translation);
+        QFile File(this->BaseDir +this->SourceLang+"2"+this->TargetLang+this->CacheExtension);
         if (File.open(QFile::Append))
         {
             QTextStream Dictionary(&File);
             Dictionary.setCodec("UTF-8");
             Dictionary<<_flWord << ";:;" << _translation<<endl;
         }
-        this->OldEntries.insertMulti(_flWord, _translation);
     }
 
     QStringList checkCache(const QString& _word) const {
@@ -130,6 +136,8 @@ private:
 protected:
     QString SourceLang;
     QString TargetLang;
+    QString ShortName;
+    QString FullName;
 
 private:
     QString BaseDir;
@@ -139,8 +147,6 @@ private:
 
 
 struct stuExternalComponent{
-    QString ShortName;
-    QString FullName;
     intfBaseExternalComponent* Instance;
     bool Selectable;
 };

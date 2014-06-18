@@ -30,7 +30,11 @@ MWA_ADD_EXCEPTION_HANDLER(exExternStemmer, exMWABase)
 class intfExternalStemmer : virtual public intfBaseExternalComponent
 {
 public:
-    intfExternalStemmer(){}
+    intfExternalStemmer(const QString& _shortName,
+                        const QString& _fullName){
+       this->ShortName = _shortName;
+       this->FullName = _fullName;
+   }
 
     virtual QString getStem(const QString& _word, bool _reverseDir) = 0;
 

@@ -38,33 +38,33 @@
 /**********************************/
 
 static stuExternalComponent Dictionaries[] = {
-    {"null", "NULL", NullDicAndStemmer::instance(), false},
-    {"cd", "cached", CachedDictionary::instance(), true},
-    {"in", "interactive", InteractiveDicAndStemmer::instance(), true},
-    {"gz", "giza", GizaBasedDic::instance(), true},
-    {"gl", "glosbe", GlosbeDic::instance(), true},
-    {"gg", "google", GoogleTranslate::instance(), true},
-    {"wr", "wordreference", WordreferenceDic::instance(), true},
-    {"","",NULL,false}
+    {NullDicAndStemmer::instance(), false},
+    {CachedDictionary::instance(), true},
+    {InteractiveDicAndStemmer::instance(), true},
+    {GizaBasedDic::instance(), true},
+    {GlosbeDic::instance(), true},
+    {GoogleTranslate::instance(), true},
+    {WordreferenceDic::instance(), true},
+    {NULL,false}
 };
 
 static stuExternalComponent Stemmers[] = {
-    {"null", "NULL", NullDicAndStemmer::instance(), false},
-    {"in", "interactive", InteractiveDicAndStemmer::instance(), true},
-    {"wn", "wordnet", WordreferenceStemmer::instance(),
+    {NullDicAndStemmer::instance(), false},
+    {InteractiveDicAndStemmer::instance(), true},
+    {WordreferenceStemmer::instance(),
      #ifdef USE_WN
      true
      #else
      false
      #endif
     },
-    {"wr", "wordreference", WordreferenceStemmer::instance(), true},
-    {"","",NULL,false}
+    {WordreferenceStemmer::instance(), true},
+    {NULL,false}
 };
 
 static intfBaseExternalComponent* getcomponentInstance(const QString& _dic, stuExternalComponent* _component){
     while(_component->Instance){
-        if (_dic == _component->ShortName || _dic == _component->FullName)
+        if (_dic == _component->Instance->shortName() || _dic == _component->Instance->fullName())
             return _component->Instance;
         _component ++;
     }
@@ -76,7 +76,7 @@ static QStringList getComponentNames(stuExternalComponent* _component){
     QStringList Names;
     while(_component->Instance){
         if (_component->Selectable)
-            Names.append(_component->ShortName + "/" + _component->FullName);
+            Names.append(_component->Instance->shortName() + "/" + _component->Instance->fullName());
         _component ++;
     }
 
@@ -111,7 +111,7 @@ void Engine::initialize(intfExternalDictionary* _externDic,
     this->ExternalDic->init(OutputDir + "/", _sourceLang, _targetLang, _externDicArgs);
     this->ExternalStemmer->init(OutputDir + "/", _sourceLang, _targetLang, _externStemmerArgs);
 
-    Knowledge::instance().init();
+    Knowledge::instance().init(OutputDir + "/", _sourceLang, _targetLang);
 }
 
 void Engine::process(const QString &_sourceFile, const QString &_targetFile)
@@ -132,15 +132,13 @@ void Engine::process(const QString &_sourceFile, const QString &_targetFile)
     QString SourceLine;
     QString TargetLine;
 
-    Knowledge::instance().load(this->OutputDir);
-
     while(!SourceStream.atEnd() && ! TargetStream.atEnd()){
         SourceLine = SourceStream.readLine().trimmed();
         TargetLine = TargetStream.readLine().trimmed();
 
         ILA::instance().process(SourceLine, TargetLine);
 
-        Knowledge::instance().save(this->OutputDir);
+        Knowledge::instance().save(this->OutputDir + "/");
     }
 
 }

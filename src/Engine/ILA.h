@@ -44,23 +44,23 @@ private:
     struct stuReservation
     {
         QStringList::Iterator FirstLangIter;
-        QString FirstLangWords;
+        QString FirstLangTokens;
         bool IsSequence;
         bool AcceptedSequence;
         bool WasAccepted;
-        QList<stuReservedTranslation> SecondLangWords;
+        QList<stuReservedTranslation> SecondLangTokens;
 
         stuReservation(QStringList::Iterator _firstLangIter,
                        const QList<stuReservedTranslation>& _secondLangReserved,
                        bool _accepted,
-                       const QString _firstLangWords = "")
+                       const QString _firstLangTokens = "")
         {
             this->FirstLangIter =_firstLangIter;
-            this->FirstLangWords = _firstLangWords.isEmpty() ? *_firstLangIter : _firstLangWords;
-            this->SecondLangWords = _secondLangReserved;
+            this->FirstLangTokens = _firstLangTokens.isEmpty() ? *_firstLangIter : _firstLangTokens;
+            this->SecondLangTokens = _secondLangReserved;
             this->IsSequence = false;
             this->WasAccepted = _accepted;
-            this->AcceptedSequence = _firstLangWords.size() ? true : false;
+            this->AcceptedSequence = _firstLangTokens.size() ? true : false;
         }
     };
 
@@ -73,19 +73,19 @@ public:
                  const QString& _slPhrase);
 
 private:
-    void reserve(QStringList::Iterator &_firstLangWord,
-                 const QList<QStringList::Iterator> &_secondLangWords,
+    void reserve(QStringList::Iterator &_firstLangToken,
+                 const QList<QStringList::Iterator> &_secondLangTokens,
                  bool _isAccepted);
     void reserve(QStringList::Iterator &_flwStart,
                  QStringList::Iterator &_flwEnd,
-                 const QList<QStringList::Iterator> &_secondLangWords, bool _isAccepted);
+                 const QList<QStringList::Iterator> &_secondLangTokens, bool _isAccepted);
 
-    void add2SequenceDic(const QString& _firstLangWords,
-                         const QList<stuReservedTranslation> &_secondLangWords);
-    void add2SequenceDic(const QString &_firstLangWords,
+    void add2SequenceDic(const QString& _firstLangTokens,
+                         const QList<stuReservedTranslation> &_secondLangTokens);
+    void add2SequenceDic(const QString &_firstLangTokens,
                          const QString &_translation);
 
-    bool areSameTranslations(const QString& _flWords,
+    bool areSameTranslations(const QString& _flToken,
                              const QList<stuReservedTranslation>& _suggestedTranslation);
 
     QStringList getPredictionByKnowledge(const QStringList &_phrasePart,
